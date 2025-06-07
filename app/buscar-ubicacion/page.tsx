@@ -1,50 +1,57 @@
-"use client"
+// app/buscar-ubicacion/page.tsx
+// RUTA: app/buscar-ubicacion/page.tsx
 
-import { useState } from "react"
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react"
 import { ArrowLeft, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Link from "next/link"
 import PropertyMapWrapper from "@/components/property-map-wrapper"
-import MapSearch from "@/components/map-search"
+import { SearchAutocomplete } from "@/components/google-autocomplete"
+import { usePropertyFilters } from "@/hooks/use-property-filters"
+import { SEARCH_RADIUS_OPTIONS, type LocationData } from "@/lib/location-utils"
 import { allProperties } from "@/lib/data"
-import type { google } from "google-maps"
 
 export default function SearchLocationPage() {
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [locationName, setLocationName] = useState("")
-  const [nearbyProperties, setNearbyProperties] = useState(allProperties)
+  const [selectedRadius, setSelectedRadius] = useState<number>(10)
+  
+  const {
+    filters,
+    filteredProperties,
+    mapCenter,
+    mapZoom,
+    stats,
+    setLocation,
+    setRadius,
+    clearLocation
+  } = usePropertyFilters({ 
+    properties: allProperties,
+    initialFilters: { radius: selectedRadius }
+  })
 
-  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
-    if (place.geometry?.location) {
-      const lat = place.geometry.location.lat()
-      const lng = place.geometry.location.lng()
-
-      setSelectedLocation({ lat, lng })
-      setLocationName(place.formatted_address || place.name || "")
-
-      // Filtrar propiedades cercanas (simulado - en producción usarías una búsqueda real)
-      const filtered = allProperties.filter((property) => {
-        const distance = calculateDistance(lat, lng, property.latitude, property.longitude)
-        return distance < 10 // 10km radius
-      })
-
-      setNearbyProperties(filtered)
-    }
+  const handleLocationSelect = (location: LocationData) => {
+    setLocation(location)
+    setRadius(selectedRadius)
   }
 
-  // Función simple para calcular distancia (Haversine formula simplificada)
-  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-    const R = 6371 // Radio de la Tierra en km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180
-    const dLng = ((lng2 - lng1) * Math.PI) / 180
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
+  const handleRadiusChange = (newRadius: number) => {
+    setSelectedRadius(newRadius)
+    setRadius(newRadius)
+  }
+
+  const handleViewResults = () => {
+    if (filters.location) {
+      const params = new URLSearchParams()
+      params.set("ubicacion", filters.location.address)
+      params.set("lat", filters.location.lat.toString())
+      params.set("lng", filters.location.lng.toString())
+      params.set("radio", (filters.radius || 10).toString())
+      
+      window.location.href = `/propiedades?${params.toString()}`
+    }
   }
 
   return (
@@ -58,41 +65,106 @@ export default function SearchLocationPage() {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="text-red-600" size={20} />
                     Buscar por Ubicación
                   </CardTitle>
-                  <CardDescription>Encuentra propiedades cerca de una ubicación específica</CardDescription>
+                  <CardDescription>
+                    Encuentra propiedades cerca de una ubicación específica
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <MapSearch
-                    onPlaceSelect={handlePlaceSelect}
-                    placeholder="Buscar dirección, barrio o punto de interés..."
-                  />
-
-                  {locationName && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm font-medium text-green-800">Ubicación seleccionada:</p>
-                      <p className="text-sm text-green-700">{locationName}</p>
-                    </div>
-                  )}
-
-                  <div className="pt-4 border-t">
-                    <h3 className="font-medium mb-2">Propiedades encontradas</h3>
-                    <p className="text-2xl font-bold text-red-600">{nearbyProperties.length}</p>
-                    <p className="text-sm text-gray-500">en un radio de 10km</p>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Ubicación
+                    </label>
+                    <SearchAutocomplete
+                      onLocationSelect={handleLocationSelect}
+                      placeholder="Buscar dirección, barrio o punto de interés..."
+                    />
                   </div>
 
-                  {nearbyProperties.length > 0 && (
-                    <Link href="/propiedades">
-                      <Button className="w-full bg-red-600 hover:bg-red-700">Ver todas las propiedades</Button>
-                    </Link>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Radio de búsqueda
+                    </label>
+                    <Select 
+                      value={selectedRadius.toString()} 
+                      onValueChange={(value) => handleRadiusChange(Number(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar radio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SEARCH_RADIUS_OPTIONS.map((option: { value: Key | null | undefined; label: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined }) => (
+                          <SelectItem 
+                            key={option.value} 
+                            value={String(option.value)}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {filters.location && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm font-medium text-green-800 mb-1">
+                        Ubicación seleccionada:
+                      </p>
+                      <p className="text-sm text-green-700 mb-2">
+                        {filters.location.address}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearLocation}
+                        className="text-green-700 hover:text-green-800 h-auto p-0"
+                      >
+                        Cambiar ubicación
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
+
+              {filters.location && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Resultados</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-2xl font-bold text-red-600">
+                          {stats.filtered}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          propiedades encontradas
+                        </p>
+                      </div>
+                      
+                      <div className="text-sm text-gray-600">
+                        <p>En un radio de {filters.radius} km</p>
+                        <p>de {stats.total} propiedades totales</p>
+                      </div>
+
+                      {stats.hasResults && (
+                        <Button 
+                          className="w-full bg-red-600 hover:bg-red-700"
+                          onClick={handleViewResults}
+                        >
+                          Ver todas las propiedades
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             <div className="lg:col-span-2">
@@ -100,20 +172,47 @@ export default function SearchLocationPage() {
                 <CardHeader>
                   <CardTitle>Mapa de Propiedades</CardTitle>
                   <CardDescription>
-                    {selectedLocation
-                      ? `Mostrando propiedades cerca de ${locationName}`
-                      : "Busca una ubicación para ver propiedades cercanas"}
+                    {filters.location
+                      ? `Mostrando ${stats.filtered} propiedades cerca de ${filters.location.address}`
+                      : "Busca una ubicación para ver propiedades cercanas"
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <PropertyMapWrapper
-                    properties={nearbyProperties}
-                    center={selectedLocation || undefined}
-                    zoom={selectedLocation ? 13 : 11}
+                    properties={filteredProperties}
+                    center={mapCenter || undefined}
+                    zoom={mapZoom}
                     height="500px"
                   />
                 </CardContent>
               </Card>
+              
+              {!filters.location && (
+                <div className="mt-6 text-center">
+                  <p className="text-gray-500 mb-4">
+                    👆 Usa el buscador arriba para encontrar propiedades cerca de cualquier ubicación
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                    {["Palermo", "Recoleta", "Puerto Madero", "Belgrano", "San Telmo", "Colegiales"].map((area) => (
+                      <Button
+                        key={area}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Simular selección rápida de área conocida
+                          const coords = getAreaCoordinates(area)
+                          if (coords) {
+                            handleLocationSelect(coords)
+                          }
+                        }}
+                      >
+                        {area}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -122,4 +221,42 @@ export default function SearchLocationPage() {
       <Footer />
     </div>
   )
+}
+
+// Función helper para coordenadas de áreas conocidas
+function getAreaCoordinates(area: string): LocationData | null {
+  const areaMap: Record<string, LocationData> = {
+    "Palermo": {
+      address: "Palermo, Buenos Aires",
+      lat: -34.5889,
+      lng: -58.4298
+    },
+    "Recoleta": {
+      address: "Recoleta, Buenos Aires",
+      lat: -34.5875,
+      lng: -58.3974
+    },
+    "Puerto Madero": {
+      address: "Puerto Madero, Buenos Aires",
+      lat: -34.6084,
+      lng: -58.3640
+    },
+    "Belgrano": {
+      address: "Belgrano, Buenos Aires",
+      lat: -34.5633,
+      lng: -58.4578
+    },
+    "San Telmo": {
+      address: "San Telmo, Buenos Aires",
+      lat: -34.6142,
+      lng: -58.3776
+    },
+    "Colegiales": {
+      address: "Colegiales, Buenos Aires",
+      lat: -34.5624,
+      lng: -58.4512
+    }
+  }
+  
+  return areaMap[area] || null
 }

@@ -1,6 +1,8 @@
+// components/notifications-dropdown.tsx
+// RUTA: components/notifications-dropdown.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Bell } from "lucide-react"
@@ -47,11 +49,29 @@ const sampleNotifications = [
 
 export default function NotificationsDropdown() {
   const [notifications, setNotifications] = useState(sampleNotifications)
-  const [hasUnread, setHasUnread] = useState(true)
+  const [hasUnread, setHasUnread] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Evitar hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+    // Calcular hasUnread después de montar
+    const unreadCount = notifications.filter(notif => !notif.read).length
+    setHasUnread(unreadCount > 0)
+  }, [notifications])
 
   const markAllAsRead = () => {
     setNotifications(notifications.map((notif) => ({ ...notif, read: true })))
     setHasUnread(false)
+  }
+
+  // Renderizado simple durante SSR y antes de hidratación
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" className="rounded-full relative">
+        <Bell className="h-5 w-5" />
+      </Button>
+    )
   }
 
   return (
@@ -59,15 +79,19 @@ export default function NotificationsDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full relative">
           <Bell className="h-5 w-5" />
-          {hasUnread && <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-600"></span>}
+          {hasUnread && (
+            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-600"></span>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>Notificaciones</span>
-          <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-auto py-1">
-            Marcar todo como leído
-          </Button>
+          {hasUnread && (
+            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-auto py-1">
+              Marcar todo como leído
+            </Button>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="max-h-[400px] overflow-auto">
@@ -86,7 +110,9 @@ export default function NotificationsDropdown() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-sm">{notification.title}</p>
-                      {!notification.read && <span className="h-2 w-2 rounded-full bg-red-600"></span>}
+                      {!notification.read && (
+                        <span className="h-2 w-2 rounded-full bg-red-600"></span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600 line-clamp-2">{notification.message}</p>
                     <p className="text-xs text-gray-500 mt-1">{notification.time}</p>

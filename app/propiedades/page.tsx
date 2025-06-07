@@ -1,20 +1,35 @@
+// app/propiedades/page.tsx
+// RUTA: app/propiedades/page.tsx
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Grid3X3, MapIcon } from "lucide-react"
+import { Filter, Grid3X3, MapIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import PropertyCard from "@/components/property-card"
 import PropertyMapWrapper from "@/components/property-map-wrapper"
+import { SearchAutocomplete } from "@/components/google-autocomplete"
 import { allProperties } from "@/lib/data"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 
 export default function PropertiesPage() {
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
+  const [searchLocation, setSearchLocation] = useState("")
+  const [filteredProperties, setFilteredProperties] = useState(allProperties)
+
+  const handleLocationSelect = (location: { address: string; lat: number; lng: number }) => {
+    setSearchLocation(location.address)
+    console.log("Ubicación seleccionada:", location)
+    // Aquí podrías implementar filtrado por proximidad a la ubicación
+  }
+
+  const handleSearch = () => {
+    // Implementar lógica de búsqueda
+    console.log("Buscando propiedades en:", searchLocation)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -23,9 +38,12 @@ export default function PropertiesPage() {
       <main className="flex-1 bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <Input placeholder="Buscar por ubicación, barrio o código" className="pl-10 w-full" />
+            <div className="flex-1">
+              <SearchAutocomplete
+                onLocationSelect={handleLocationSelect}
+                placeholder="Buscar por ubicación, barrio o código"
+                className="w-full"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -74,18 +92,10 @@ export default function PropertiesPage() {
 
                     <div>
                       <h3 className="text-sm font-medium mb-3">Ubicación</h3>
-                      <Select defaultValue="buenos-aires">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ubicación" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="buenos-aires">Buenos Aires</SelectItem>
-                          <SelectItem value="palermo">Palermo</SelectItem>
-                          <SelectItem value="recoleta">Recoleta</SelectItem>
-                          <SelectItem value="belgrano">Belgrano</SelectItem>
-                          <SelectItem value="puerto-madero">Puerto Madero</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <SearchAutocomplete
+                        onLocationSelect={handleLocationSelect}
+                        placeholder="Buscar ubicación específica"
+                      />
                     </div>
 
                     <div>
@@ -167,16 +177,21 @@ export default function PropertiesPage() {
 
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Propiedades en Buenos Aires</h1>
-            <p className="text-gray-600">Mostrando {allProperties.length} propiedades</p>
+            <p className="text-gray-600">
+              Mostrando {filteredProperties.length} propiedades
+              {searchLocation && (
+                <span className="text-red-600"> cerca de "{searchLocation}"</span>
+              )}
+            </p>
           </div>
 
           {viewMode === "map" ? (
             <div className="h-[calc(100vh-200px)] rounded-lg overflow-hidden">
-              <PropertyMapWrapper properties={allProperties} height="calc(100vh-200px)" />
+              <PropertyMapWrapper properties={filteredProperties} height="calc(100vh-200px)" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allProperties.map((property) => (
+              {filteredProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>

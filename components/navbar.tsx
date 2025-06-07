@@ -1,6 +1,8 @@
+// components/navbar.tsx
+// RUTA: components/navbar.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -17,6 +19,70 @@ import NotificationsDropdown from "@/components/notifications-dropdown"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevenir hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Renderizado simplificado durante SSR
+  if (!mounted) {
+    return (
+      <header className="bg-white border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/remax.webp"
+                alt="REMAX SUMA Logo"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
+            </Link>
+
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/propiedades" className="text-gray-700 hover:text-red-600 font-medium">
+                Propiedades
+              </Link>
+              <Link href="/vender" className="text-gray-700 hover:text-red-600 font-medium">
+                Vender
+              </Link>
+              <Link href="/alquilar" className="text-gray-700 hover:text-red-600 font-medium">
+                Alquilar
+              </Link>
+              <Link href="/agentes" className="text-gray-700 hover:text-red-600 font-medium">
+                Agentes
+              </Link>
+              <Link href="/contacto" className="text-gray-700 hover:text-red-600 font-medium">
+                Contacto
+              </Link>
+            </nav>
+
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Heart className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="md:hidden flex items-center">
+              <Button variant="ghost" size="icon">
+                <Menu size={24} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+    )
+  }
 
   return (
     <header className="bg-white border-b sticky top-0 z-50">
@@ -29,6 +95,7 @@ export default function Navbar() {
               width={120}
               height={40}
               className="h-10 w-auto"
+              priority
             />
           </Link>
 
@@ -147,7 +214,11 @@ export default function Navbar() {
           </div>
 
           <div className="md:hidden flex items-center">
-            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
           </div>

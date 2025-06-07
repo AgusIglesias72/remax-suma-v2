@@ -1,12 +1,14 @@
+// components/google-map.tsx
+// RUTA: components/google-map.tsx
 "use client"
 
-import { useCallback, useState, useMemo } from "react"
-import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from "@react-google-maps/api"
+import { useCallback, useState, useMemo, useEffect } from "react"
+import { GoogleMap, InfoWindow } from "@react-google-maps/api"
 import Image from "next/image"
 import Link from "next/link"
 import type { PropertyType } from "@/lib/types"
 import { formatPrice, formatSurface } from "@/lib/data"
-// import { google } from "google-maps"
+import { useGoogleMaps } from "@/components/providers/google-maps-provider"
 
 interface GoogleMapComponentProps {
   properties: PropertyType[]
@@ -14,8 +16,6 @@ interface GoogleMapComponentProps {
   zoom?: number
   height?: string
 }
-
-const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["places"]
 
 const mapContainerStyle = {
   width: "100%",
@@ -33,6 +33,7 @@ const mapOptions = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: true,
+  mapId: "DEMO_MAP_ID", // Requerido para AdvancedMarkerElement
   styles: [
     {
       featureType: "poi",
@@ -53,14 +54,10 @@ export default function GoogleMapComponent({
   zoom = 12,
   height = "400px",
 }: GoogleMapComponentProps) {
+  const { isLoaded, loadError } = useGoogleMaps()
   const [selectedProperty, setSelectedProperty] = useState<PropertyType | null>(null)
-  const [map, setMap] = useState<any | null>(null)
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries,
-  })
+  const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [markers, setMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([])
 
   const mapCenter = useMemo(() => {
     if (center) return center
@@ -71,7 +68,7 @@ export default function GoogleMapComponent({
   }, [center, properties])
 
   const onLoad = useCallback(
-    (map: any) => {
+    (map: google.maps.Map) => {
       setMap(map)
 
       // Si hay múltiples propiedades, ajustar el mapa para mostrar todas
@@ -90,9 +87,54 @@ export default function GoogleMapComponent({
     setMap(null)
   }, [])
 
-  const handleMarkerClick = (property: PropertyType) => {
-    setSelectedProperty(property)
-  }
+  // Crear marcadores avanzados cuando el mapa y las propiedades cambien
+  useEffect(() => {
+    if (!map || !isLoaded || !window.google?.maps?.marker?.AdvancedMarkerElement) return
+
+    // Limpiar marcadores anteriores
+    markers.forEach(marker => {
+      marker.map = null
+    })
+
+    // Crear nuevos marcadores
+    const newMarkers = properties.map((property) => {
+      // Crear elemento del marcador
+      const markerElement = document.createElement('div')
+      markerElement.className = 'custom-marker'
+      markerElement.style.cssText = `
+        width: 16px;
+        height: 16px;
+        background-color: #dc2626;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      `
+
+      // Crear marcador avanzado
+      const marker = new window.google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: { lat: property.latitude, lng: property.longitude },
+        content: markerElement,
+        title: property.title,
+      })
+
+      // Agregar evento click
+      marker.addListener('click', () => {
+        setSelectedProperty(property)
+      })
+
+      return marker
+    })
+
+    setMarkers(newMarkers)
+
+    return () => {
+      newMarkers.forEach(marker => {
+        marker.map = null
+      })
+    }
+  }, [map, properties, isLoaded, markers])
 
   const handleInfoWindowClose = () => {
     setSelectedProperty(null)
@@ -130,22 +172,6 @@ export default function GoogleMapComponent({
         onUnmount={onUnmount}
         options={mapOptions}
       >
-        {properties.map((property) => (
-          <Marker
-            key={property.id}
-            position={{ lat: property.latitude, lng: property.longitude }}
-            onClick={() => handleMarkerClick(property)}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#dc2626",
-              fillOpacity: 1,
-              strokeColor: "#ffffff",
-              strokeWeight: 2,
-            }}
-          />
-        ))}
-
         {selectedProperty && (
           <InfoWindow
             position={{ lat: selectedProperty.latitude, lng: selectedProperty.longitude }}

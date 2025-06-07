@@ -1,17 +1,67 @@
+// app/page.tsx
+// RUTA: app/page.tsx
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Home, ArrowRight, TrendingUp, Users, MapIcon } from "lucide-react"
+import { ArrowRight, TrendingUp, Users, MapIcon, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import PropertyCard from "@/components/property-card"
+import { SearchAutocomplete } from "@/components/google-autocomplete"
+import { type LocationData } from "@/lib/location-utils"
 import { featuredProperties, stats } from "@/lib/data"
 import { formatPrice } from "@/lib/data"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 
 export default function HomePage() {
+  const [operationType, setOperationType] = useState("venta")
+  const [propertyType, setPropertyType] = useState("cualquier-tipo")
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
+
+  const handleLocationSelect = (location: LocationData) => {
+    setSelectedLocation(location)
+  }
+
+  const handleSearch = () => {
+    const params = new URLSearchParams()
+    
+    // Agregar filtros básicos
+    if (operationType !== "venta") {
+      params.set("operacion", operationType)
+    }
+    if (propertyType !== "cualquier-tipo") {
+      params.set("tipo", propertyType)
+    }
+    
+    // Agregar información de ubicación si está disponible
+    if (selectedLocation) {
+      params.set("ubicacion", selectedLocation.address)
+      params.set("lat", selectedLocation.lat.toString())
+      params.set("lng", selectedLocation.lng.toString())
+      // Radio por defecto para búsquedas desde home
+      params.set("radio", "10")
+    }
+    
+    // Redirigir a la página de propiedades con los parámetros
+    window.location.href = `/propiedades?${params.toString()}`
+  }
+
+  const handleCitySearch = (city: string) => {
+    const params = new URLSearchParams()
+    params.set("ciudad", city.toLowerCase().replace(" ", "-"))
+    window.location.href = `/propiedades?${params.toString()}`
+  }
+
+  const handlePropertyTypeSearch = (type: string, count: number) => {
+    const params = new URLSearchParams()
+    params.set("tipo", type.toLowerCase().replace(" ", "-"))
+    window.location.href = `/propiedades?${params.toString()}`
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -28,14 +78,16 @@ export default function HomePage() {
             />
           </div>
           <div className="container mx-auto px-4 relative z-10 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Encuentra tu lugar ideal en Buenos Aires</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Encuentra tu lugar ideal en Buenos Aires
+            </h1>
             <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
               Las mejores propiedades en venta y alquiler con los agentes más calificados
             </p>
 
             <div className="bg-white p-4 rounded-lg shadow-lg max-w-4xl mx-auto">
               <div className="flex flex-col md:flex-row gap-4">
-                <Select defaultValue="venta">
+                <Select value={operationType} onValueChange={setOperationType}>
                   <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder="Operación" />
                   </SelectTrigger>
@@ -46,7 +98,7 @@ export default function HomePage() {
                   </SelectContent>
                 </Select>
 
-                <Select defaultValue="cualquier-tipo">
+                <Select value={propertyType} onValueChange={setPropertyType}>
                   <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
@@ -60,13 +112,28 @@ export default function HomePage() {
                   </SelectContent>
                 </Select>
 
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <Input placeholder="Buscar por ubicación, barrio o código" className="pl-10 w-full" />
+                <div className="flex-1">
+                  <SearchAutocomplete
+                    onLocationSelect={handleLocationSelect}
+                    placeholder="Buscar por ubicación, barrio o código"
+                    className="w-full"
+                  />
                 </div>
 
-                <Button className="bg-red-600 hover:bg-red-700 w-full md:w-auto">Buscar</Button>
+                <Button 
+                  className="bg-red-600 hover:bg-red-700 w-full md:w-auto"
+                  onClick={handleSearch}
+                >
+                  Buscar
+                </Button>
               </div>
+              
+              {/* Mostrar ubicación seleccionada */}
+              {selectedLocation && (
+                <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                  📍 Buscarás cerca de: {selectedLocation.address}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -149,10 +216,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
               {stats.top_cities.map((city) => (
-                <Link
-                  href={`/propiedades?ciudad=${city.toLowerCase().replace(" ", "-")}`}
+                <button
                   key={city}
-                  className="group relative h-32 rounded-lg overflow-hidden shadow-md bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all"
+                  onClick={() => handleCitySearch(city)}
+                  className="group relative h-32 rounded-lg overflow-hidden shadow-md bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all cursor-pointer"
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-white">
@@ -160,7 +227,7 @@ export default function HomePage() {
                       <p className="text-xs opacity-90">Ver propiedades</p>
                     </div>
                   </div>
-                </Link>
+                </button>
               ))}
             </div>
           </div>
@@ -175,17 +242,17 @@ export default function HomePage() {
               {Object.entries(stats.property_types)
                 .slice(0, 8)
                 .map(([type, count]) => (
-                  <Link
-                    href={`/propiedades?tipo=${type.toLowerCase().replace(" ", "-")}`}
+                  <button
                     key={type}
-                    className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center group"
+                    onClick={() => handlePropertyTypeSearch(type, count)}
+                    className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center group cursor-pointer"
                   >
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200 transition-colors">
                       <Home className="text-red-600" size={28} />
                     </div>
                     <h3 className="font-medium mb-2">{type}</h3>
                     <p className="text-gray-600 text-sm">{count} propiedades</p>
-                  </Link>
+                  </button>
                 ))}
             </div>
           </div>
