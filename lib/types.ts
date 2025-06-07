@@ -1,0 +1,65 @@
+export interface AgentType {
+  id: string
+  name: string
+  email: string
+  phone: string
+  properties_count: number
+  avatar?: string
+  bio?: string
+}
+
+export interface PropertyType {
+  id: string
+  mls_id: string
+  title: string
+  description: string
+  status: string
+  operation_type: string
+  property_type: string
+  address: string
+  neighborhood?: string
+  city: string
+  latitude: number
+  longitude: number
+  rooms: number
+  bedrooms: number
+  bathrooms: number
+  garages: number
+  covered_surface?: number
+  uncovered_surface?: number
+  semicovered_surface?: number
+  land_surface?: number
+  total_built_surface?: number
+  price: number
+  currency: string
+  agent_name: string
+  days_on_market: number
+  created_at: string
+  listing_date: string
+  images: string[]
+}
+
+export interface StatsType {
+  total_properties: number
+  active_properties: number
+  total_agents: number
+  total_cities: number
+  total_value: number
+  average_price: number
+  price_range: {
+    min: number
+    max: number
+  }
+  property_types: Record<string, number>
+  operation_types: Record<string, number>
+  top_cities: string[]
+}
+
+export interface DatabaseType {
+  properties: PropertyType[]
+  agents: AgentType[]
+  stats: StatsType
+  generated_at: string
+  source: string
+  version: string
+}
