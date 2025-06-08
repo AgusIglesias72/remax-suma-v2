@@ -1,9 +1,8 @@
 // components/google-map.tsx
-// RUTA: components/google-map.tsx
 "use client"
 
 import { useCallback, useState, useMemo, useEffect } from "react"
-import { GoogleMap, InfoWindow } from "@react-google-maps/api"
+import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api"
 import Image from "next/image"
 import Link from "next/link"
 import type { PropertyType } from "@/lib/types"
@@ -33,7 +32,6 @@ const mapOptions = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: true,
-  mapId: "DEMO_MAP_ID", // Requerido para AdvancedMarkerElement
   styles: [
     {
       featureType: "poi",
@@ -48,6 +46,16 @@ const mapOptions = {
   ],
 }
 
+// Icono personalizado para los marcadores
+const createCustomMarkerIcon = (isSelected: boolean = false) => ({
+  path: google.maps.SymbolPath.CIRCLE,
+  scale: isSelected ? 12 : 8,
+  fillColor: "#dc2626",
+  fillOpacity: 1,
+  strokeColor: "#ffffff",
+  strokeWeight: 2,
+})
+
 export default function GoogleMapComponent({
   properties,
   center,
@@ -57,7 +65,6 @@ export default function GoogleMapComponent({
   const { isLoaded, loadError } = useGoogleMaps()
   const [selectedProperty, setSelectedProperty] = useState<PropertyType | null>(null)
   const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [markers, setMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([])
 
   const mapCenter = useMemo(() => {
     if (center) return center
@@ -71,13 +78,19 @@ export default function GoogleMapComponent({
     (map: google.maps.Map) => {
       setMap(map)
 
-      // Si hay múltiples propiedades, ajustar el mapa para mostrar todas
+      // Si hay múltiples propiedades y no hay centro específico, ajustar el mapa para mostrar todas
       if (properties.length > 1 && !center) {
         const bounds = new window.google.maps.LatLngBounds()
         properties.forEach((property) => {
           bounds.extend({ lat: property.latitude, lng: property.longitude })
         })
         map.fitBounds(bounds)
+        
+        // Asegurar un zoom mínimo para evitar estar muy alejado
+        const listener = google.maps.event.addListener(map, 'idle', () => {
+          if (map.getZoom() && map.getZoom()! > 15) map.setZoom(15)
+          google.maps.event.removeListener(listener)
+        })
       }
     },
     [properties, center],
@@ -87,57 +100,23 @@ export default function GoogleMapComponent({
     setMap(null)
   }, [])
 
-  // Crear marcadores avanzados cuando el mapa y las propiedades cambien
-  useEffect(() => {
-    if (!map || !isLoaded || !window.google?.maps?.marker?.AdvancedMarkerElement) return
-
-    // Limpiar marcadores anteriores
-    markers.forEach(marker => {
-      marker.map = null
-    })
-
-    // Crear nuevos marcadores
-    const newMarkers = properties.map((property) => {
-      // Crear elemento del marcador
-      const markerElement = document.createElement('div')
-      markerElement.className = 'custom-marker'
-      markerElement.style.cssText = `
-        width: 16px;
-        height: 16px;
-        background-color: #dc2626;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      `
-
-      // Crear marcador avanzado
-      const marker = new window.google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: { lat: property.latitude, lng: property.longitude },
-        content: markerElement,
-        title: property.title,
-      })
-
-      // Agregar evento click
-      marker.addListener('click', () => {
-        setSelectedProperty(property)
-      })
-
-      return marker
-    })
-
-    setMarkers(newMarkers)
-
-    return () => {
-      newMarkers.forEach(marker => {
-        marker.map = null
-      })
-    }
-  }, [map, properties, isLoaded, markers])
+  const handleMarkerClick = (property: PropertyType) => {
+    setSelectedProperty(property)
+  }
 
   const handleInfoWindowClose = () => {
     setSelectedProperty(null)
+  }
+
+  // Función para generar un ícono personalizado más visible
+  const getMarkerIcon = (property: PropertyType) => {
+    const isSelected = selectedProperty?.id === property.id
+    
+    if (isLoaded && window.google) {
+      return createCustomMarkerIcon(isSelected)
+    }
+    
+    return undefined
   }
 
   if (loadError) {
@@ -145,7 +124,7 @@ export default function GoogleMapComponent({
       <div className="w-full bg-gray-200 flex items-center justify-center rounded-lg" style={{ height }}>
         <div className="text-center text-gray-600">
           <p className="mb-2">Error al cargar el mapa</p>
-          <p className="text-sm">Verifica tu conexión a internet</p>
+          <p className="text-sm">Verifica tu conexión a internet y la API key de Google Maps</p>
         </div>
       </div>
     )
@@ -172,6 +151,18 @@ export default function GoogleMapComponent({
         onUnmount={onUnmount}
         options={mapOptions}
       >
+        {/* Marcadores usando componente Marker estándar */}
+        {properties.map((property) => (
+          <Marker
+            key={property.id}
+            position={{ lat: property.latitude, lng: property.longitude }}
+            onClick={() => handleMarkerClick(property)}
+            icon={getMarkerIcon(property)}
+            title={property.title}
+          />
+        ))}
+
+        {/* InfoWindow para la propiedad seleccionada */}
         {selectedProperty && (
           <InfoWindow
             position={{ lat: selectedProperty.latitude, lng: selectedProperty.longitude }}
@@ -190,7 +181,9 @@ export default function GoogleMapComponent({
                 />
               </div>
 
-              <h3 className="font-semibold text-sm mb-2 line-clamp-2 leading-tight">{selectedProperty.title}</h3>
+              <h3 className="font-semibold text-sm mb-2 line-clamp-2 leading-tight">
+                {selectedProperty.title}
+              </h3>
 
               <p className="text-red-600 font-bold text-lg mb-2">
                 {formatPrice(selectedProperty.price, selectedProperty.currency)}
@@ -201,8 +194,14 @@ export default function GoogleMapComponent({
                 {selectedProperty.bedrooms > 0 && <span>{selectedProperty.bedrooms} dorm.</span>}
                 {selectedProperty.bathrooms > 0 && <span>{selectedProperty.bathrooms} baños</span>}
                 {(selectedProperty.total_built_surface || selectedProperty.covered_surface) && (
-                  <span>{formatSurface(selectedProperty.total_built_surface || selectedProperty.covered_surface)}</span>
+                  <span>
+                    {formatSurface(selectedProperty.total_built_surface || selectedProperty.covered_surface)}
+                  </span>
                 )}
+              </div>
+
+              <div className="text-xs text-gray-500 mb-3">
+                📍 {selectedProperty.address}, {selectedProperty.city}
               </div>
 
               <Link
@@ -215,6 +214,13 @@ export default function GoogleMapComponent({
           </InfoWindow>
         )}
       </GoogleMap>
+
+      {/* Indicador de cantidad de propiedades */}
+      {properties.length > 0 && (
+        <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-lg shadow-sm text-sm font-medium">
+          {properties.length} propiedad{properties.length !== 1 ? 'es' : ''}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,8 +1,8 @@
 // app/buscar-ubicacion/page.tsx
-// RUTA: app/buscar-ubicacion/page.tsx
+"use client"
 
-import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react"
-import { ArrowLeft, MapPin } from "lucide-react"
+import { useState } from "react"
+import { ArrowLeft, MapPin, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -11,47 +11,104 @@ import Footer from "@/components/footer"
 import Link from "next/link"
 import PropertyMapWrapper from "@/components/property-map-wrapper"
 import { SearchAutocomplete } from "@/components/google-autocomplete"
-import { usePropertyFilters } from "@/hooks/use-property-filters"
-import { SEARCH_RADIUS_OPTIONS, type LocationData } from "@/lib/location-utils"
 import { allProperties } from "@/lib/data"
+import { EmptyState, SearchLoading } from "@/components/loading-states"
+import { MapErrorBoundary } from "@/components/error-boundary"
+
+// Constantes para evitar recreaciones
+const RADIUS_OPTIONS = [
+  { value: "1", label: "1 km" },
+  { value: "2", label: "2 km" },
+  { value: "5", label: "5 km" },
+  { value: "10", label: "10 km" },
+  { value: "15", label: "15 km" },
+  { value: "25", label: "25 km" },
+  { value: "50", label: "50 km" }
+]
+
+const AREA_COORDINATES = {
+  "Palermo": { address: "Palermo, Buenos Aires", lat: -34.5889, lng: -58.4298 },
+  "Recoleta": { address: "Recoleta, Buenos Aires", lat: -34.5875, lng: -58.3974 },
+  "Puerto Madero": { address: "Puerto Madero, Buenos Aires", lat: -34.6084, lng: -58.3640 },
+  "Belgrano": { address: "Belgrano, Buenos Aires", lat: -34.5633, lng: -58.4578 },
+  "San Telmo": { address: "San Telmo, Buenos Aires", lat: -34.6142, lng: -58.3776 },
+  "Colegiales": { address: "Colegiales, Buenos Aires", lat: -34.5624, lng: -58.4512 }
+}
+
+// Función pura para calcular distancia
+function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371 // Radio de la Tierra en km
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+           Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+           Math.sin(dLng/2) * Math.sin(dLng/2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return R * c
+}
+
+// Función pura para filtrar propiedades
+function getFilteredProperties(location: any, radius: number) {
+  if (!location) return []
+  
+  return allProperties.filter(property => {
+    const distance = calculateDistance(
+      location.lat,
+      location.lng,
+      property.latitude,
+      property.longitude
+    )
+    return distance <= radius
+  })
+}
 
 export default function SearchLocationPage() {
-  const [selectedRadius, setSelectedRadius] = useState<number>(10)
+  const [location, setLocation] = useState<any>(null)
+  const [radius, setRadius] = useState("10")
+  const [isSearching, setIsSearching] = useState(false)
   
-  const {
-    filters,
-    filteredProperties,
-    mapCenter,
-    mapZoom,
-    stats,
-    setLocation,
-    setRadius,
-    clearLocation
-  } = usePropertyFilters({ 
-    properties: allProperties,
-    initialFilters: { radius: selectedRadius }
-  })
+  // Calcular propiedades filtradas de forma simple
+  const filteredProperties = location ? getFilteredProperties(location, Number(radius)) : []
+  const totalProperties = allProperties.length
+  const foundProperties = filteredProperties.length
+  const percentage = totalProperties > 0 ? Math.round((foundProperties / totalProperties) * 100) : 0
 
-  const handleLocationSelect = (location: LocationData) => {
-    setLocation(location)
-    setRadius(selectedRadius)
+  const handleLocationSelect = async (selectedLocation: any) => {
+    setIsSearching(true)
+    setLocation(selectedLocation)
+    
+    // Simular búsqueda
+    setTimeout(() => {
+      setIsSearching(false)
+    }, 800)
   }
 
-  const handleRadiusChange = (newRadius: number) => {
-    setSelectedRadius(newRadius)
+  const handleRadiusChange = (newRadius: string) => {
     setRadius(newRadius)
   }
 
   const handleViewResults = () => {
-    if (filters.location) {
+    if (location) {
       const params = new URLSearchParams()
-      params.set("ubicacion", filters.location.address)
-      params.set("lat", filters.location.lat.toString())
-      params.set("lng", filters.location.lng.toString())
-      params.set("radio", (filters.radius || 10).toString())
+      params.set("ubicacion", location.address)
+      params.set("lat", location.lat.toString())
+      params.set("lng", location.lng.toString())
+      params.set("radio", radius)
       
       window.location.href = `/propiedades?${params.toString()}`
     }
+  }
+
+  const handleQuickAreaSearch = (area: string) => {
+    const coords = AREA_COORDINATES[area as keyof typeof AREA_COORDINATES]
+    if (coords) {
+      handleLocationSelect(coords)
+    }
+  }
+
+  const clearLocation = () => {
+    setLocation(null)
+    setIsSearching(false)
   }
 
   return (
@@ -60,11 +117,12 @@ export default function SearchLocationPage() {
 
       <main className="flex-1 bg-gray-50">
         <div className="container mx-auto px-4 py-8">
-          <Link href="/propiedades" className="inline-flex items-center text-gray-600 hover:text-red-600 mb-6">
+          <Link href="/propiedades" className="inline-flex items-center text-gray-600 hover:text-red-600 mb-6 transition-colors">
             <ArrowLeft size={16} className="mr-2" /> Volver a propiedades
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Panel lateral */}
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
@@ -91,19 +149,13 @@ export default function SearchLocationPage() {
                     <label className="text-sm font-medium mb-2 block">
                       Radio de búsqueda
                     </label>
-                    <Select 
-                      value={selectedRadius.toString()} 
-                      onValueChange={(value) => handleRadiusChange(Number(value))}
-                    >
+                    <Select value={radius} onValueChange={handleRadiusChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar radio" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SEARCH_RADIUS_OPTIONS.map((option: { value: Key | null | undefined; label: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined }) => (
-                          <SelectItem 
-                            key={option.value} 
-                            value={String(option.value)}
-                          >
+                        {RADIUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
                         ))}
@@ -111,13 +163,13 @@ export default function SearchLocationPage() {
                     </Select>
                   </div>
 
-                  {filters.location && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  {location && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-sm font-medium text-green-800 mb-1">
-                        Ubicación seleccionada:
+                        📍 Ubicación seleccionada:
                       </p>
-                      <p className="text-sm text-green-700 mb-2">
-                        {filters.location.address}
+                      <p className="text-sm text-green-700 mb-3">
+                        {location.address}
                       </p>
                       <Button
                         variant="ghost"
@@ -132,85 +184,127 @@ export default function SearchLocationPage() {
                 </CardContent>
               </Card>
 
-              {filters.location && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Resultados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-2xl font-bold text-red-600">
-                          {stats.filtered}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          propiedades encontradas
-                        </p>
-                      </div>
-                      
-                      <div className="text-sm text-gray-600">
-                        <p>En un radio de {filters.radius} km</p>
-                        <p>de {stats.total} propiedades totales</p>
-                      </div>
-
-                      {stats.hasResults && (
-                        <Button 
-                          className="w-full bg-red-600 hover:bg-red-700"
-                          onClick={handleViewResults}
-                        >
-                          Ver todas las propiedades
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            <div className="lg:col-span-2">
+              {/* Búsquedas rápidas */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Mapa de Propiedades</CardTitle>
+                  <CardTitle className="text-lg">Búsquedas Rápidas</CardTitle>
                   <CardDescription>
-                    {filters.location
-                      ? `Mostrando ${stats.filtered} propiedades cerca de ${filters.location.address}`
-                      : "Busca una ubicación para ver propiedades cercanas"
-                    }
+                    Busca en áreas populares de Buenos Aires
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <PropertyMapWrapper
-                    properties={filteredProperties}
-                    center={mapCenter || undefined}
-                    zoom={mapZoom}
-                    height="500px"
-                  />
-                </CardContent>
-              </Card>
-              
-              {!filters.location && (
-                <div className="mt-6 text-center">
-                  <p className="text-gray-500 mb-4">
-                    👆 Usa el buscador arriba para encontrar propiedades cerca de cualquier ubicación
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                    {["Palermo", "Recoleta", "Puerto Madero", "Belgrano", "San Telmo", "Colegiales"].map((area) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.keys(AREA_COORDINATES).map((area) => (
                       <Button
                         key={area}
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Simular selección rápida de área conocida
-                          const coords = getAreaCoordinates(area)
-                          if (coords) {
-                            handleLocationSelect(coords)
-                          }
-                        }}
+                        onClick={() => handleQuickAreaSearch(area)}
+                        disabled={isSearching}
+                        className="text-left justify-start"
                       >
                         {area}
                       </Button>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Resultados */}
+              {(location || isSearching) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Resultados</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isSearching ? (
+                      <SearchLoading message="Buscando propiedades cercanas..." />
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">
+                            {foundProperties}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            propiedades encontradas
+                          </p>
+                        </div>
+                        
+                        <div className="text-sm text-gray-600">
+                          <p>En un radio de {radius} km</p>
+                          <p>de {totalProperties} propiedades totales</p>
+                          {percentage < 100 && (
+                            <p className="text-red-600">({percentage}% del total)</p>
+                          )}
+                        </div>
+
+                        {foundProperties > 0 && (
+                          <Button 
+                            className="w-full bg-red-600 hover:bg-red-700 gap-2"
+                            onClick={handleViewResults}
+                          >
+                            <Search size={16} />
+                            Ver todas las propiedades
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Mapa */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mapa de Propiedades</CardTitle>
+                  <CardDescription>
+                    {location
+                      ? `Mostrando ${foundProperties} propiedades cerca de ${location.address}`
+                      : "Busca una ubicación para ver propiedades cercanas"
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <MapErrorBoundary>
+                    {isSearching ? (
+                      <div className="h-[500px] w-full bg-gray-100 rounded-lg flex items-center justify-center">
+                        <SearchLoading message="Cargando mapa..." />
+                      </div>
+                    ) : (
+                      <PropertyMapWrapper
+                        properties={filteredProperties}
+                        center={location ? { lat: location.lat, lng: location.lng } : undefined}
+                        zoom={Number(radius) <= 5 ? 14 : Number(radius) <= 15 ? 12 : 11}
+                        height="500px"
+                      />
+                    )}
+                  </MapErrorBoundary>
+                </CardContent>
+              </Card>
+              
+              {!location && !isSearching && (
+                <div className="mt-6">
+                  <EmptyState
+                    icon={MapPin}
+                    title="Busca una ubicación"
+                    description="Usa el buscador arriba para encontrar propiedades cerca de cualquier ubicación en Buenos Aires"
+                    actionLabel="Buscar en Palermo"
+                    onAction={() => handleQuickAreaSearch("Palermo")}
+                  />
+                </div>
+              )}
+
+              {location && foundProperties === 0 && !isSearching && (
+                <div className="mt-6">
+                  <EmptyState
+                    icon={Search}
+                    title="No hay propiedades en esta área"
+                    description={`No encontramos propiedades en un radio de ${radius} km de ${location.address}. Intenta ampliar el radio de búsqueda.`}
+                    actionLabel="Ampliar búsqueda"
+                    onAction={() => handleRadiusChange("25")}
+                  />
                 </div>
               )}
             </div>
@@ -221,42 +315,4 @@ export default function SearchLocationPage() {
       <Footer />
     </div>
   )
-}
-
-// Función helper para coordenadas de áreas conocidas
-function getAreaCoordinates(area: string): LocationData | null {
-  const areaMap: Record<string, LocationData> = {
-    "Palermo": {
-      address: "Palermo, Buenos Aires",
-      lat: -34.5889,
-      lng: -58.4298
-    },
-    "Recoleta": {
-      address: "Recoleta, Buenos Aires",
-      lat: -34.5875,
-      lng: -58.3974
-    },
-    "Puerto Madero": {
-      address: "Puerto Madero, Buenos Aires",
-      lat: -34.6084,
-      lng: -58.3640
-    },
-    "Belgrano": {
-      address: "Belgrano, Buenos Aires",
-      lat: -34.5633,
-      lng: -58.4578
-    },
-    "San Telmo": {
-      address: "San Telmo, Buenos Aires",
-      lat: -34.6142,
-      lng: -58.3776
-    },
-    "Colegiales": {
-      address: "Colegiales, Buenos Aires",
-      lat: -34.5624,
-      lng: -58.4512
-    }
-  }
-  
-  return areaMap[area] || null
 }

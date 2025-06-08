@@ -1,8 +1,7 @@
 // hooks/use-url-filters.ts
-// RUTA: hooks/use-url-filters.ts
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import type { SearchFilters, LocationData } from "@/lib/location-utils"
 
@@ -30,7 +29,7 @@ export function useUrlFilters() {
 
     // Radio de búsqueda
     const radio = searchParams.get("radio")
-    if (radio) {
+    if (radio && !isNaN(Number(radio))) {
       filters.radius = Number(radio)
     }
 
@@ -39,7 +38,7 @@ export function useUrlFilters() {
     const lng = searchParams.get("lng")
     const ubicacion = searchParams.get("ubicacion")
     
-    if (lat && lng && ubicacion) {
+    if (lat && lng && ubicacion && !isNaN(Number(lat)) && !isNaN(Number(lng))) {
       filters.location = {
         address: ubicacion,
         lat: Number(lat),
@@ -50,7 +49,6 @@ export function useUrlFilters() {
     // Ciudad (búsqueda más general)
     const ciudad = searchParams.get("ciudad")
     if (ciudad && !filters.location) {
-      // Para ciudades, podríamos mapear a coordenadas conocidas
       const cityCoordinates = getCityCoordinates(ciudad)
       if (cityCoordinates) {
         filters.location = cityCoordinates
@@ -61,14 +59,20 @@ export function useUrlFilters() {
     // Rango de precios
     const precioMin = searchParams.get("precio_min")
     const precioMax = searchParams.get("precio_max")
-    if (precioMin && precioMax) {
+    if (precioMin && precioMax && !isNaN(Number(precioMin)) && !isNaN(Number(precioMax))) {
       filters.priceRange = [Number(precioMin), Number(precioMax)]
     }
 
     // Ambientes
     const ambientes = searchParams.get("ambientes")
-    if (ambientes) {
+    if (ambientes && !isNaN(Number(ambientes))) {
       filters.rooms = Number(ambientes)
+    }
+
+    // Baños
+    const banos = searchParams.get("banos")
+    if (banos && !isNaN(Number(banos))) {
+      filters.bathrooms = Number(banos)
     }
 
     return filters
@@ -168,6 +172,10 @@ export function generateSearchUrl(filters: SearchFilters): string {
 
   if (filters.rooms) {
     params.set("ambientes", filters.rooms.toString())
+  }
+
+  if (filters.bathrooms) {
+    params.set("banos", filters.bathrooms.toString())
   }
 
   const queryString = params.toString()

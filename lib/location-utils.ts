@@ -156,47 +156,59 @@ export function getSearchDescription(location: LocationData, count: number): str
  * Filtra propiedades por operación
  */
 export function filterPropertiesByOperation(
-  properties: PropertyType[],
-  operationType: string
-): PropertyType[] {
-  if (!operationType || operationType === "cualquier-operacion") {
-    return properties
+    properties: PropertyType[],
+    operationType: string
+  ): PropertyType[] {
+    if (!operationType || operationType === "cualquier-operacion") {
+      return properties
+    }
+    
+    // Mapeo de slugs de URL a valores reales de la base de datos
+    const operationMap: Record<string, string> = {
+      "venta": "Venta",
+      "alquiler": "Alquiler", 
+      "alquiler-temporal": "Alquiler temporal"
+    }
+    
+    const mappedOperation = operationMap[operationType.toLowerCase()] || operationType
+    return properties.filter(property => 
+      property.operation_type.toLowerCase() === mappedOperation.toLowerCase()
+    )
   }
-  
-  const operationMap: Record<string, string> = {
-    "venta": "Venta",
-    "alquiler": "Alquiler",
-    "alquiler-temporal": "Alquiler temporal"
-  }
-  
-  const mappedOperation = operationMap[operationType] || operationType
-  return properties.filter(property => property.operation_type === mappedOperation)
-}
 
 /**
  * Filtra propiedades por tipo
  */
 export function filterPropertiesByType(
-  properties: PropertyType[],
-  propertyType: string
-): PropertyType[] {
-  if (!propertyType || propertyType === "cualquier-tipo") {
-    return properties
+    properties: PropertyType[],
+    propertyType: string
+  ): PropertyType[] {
+    if (!propertyType || propertyType === "cualquier-tipo") {
+      return properties
+    }
+    
+    // Mapeo de slugs de URL a valores reales de la base de datos
+    const typeMap: Record<string, string> = {
+      "departamento-estandar": "Departamento Estándar",
+      "casa": "Casa",
+      "departamento-duplex": "Departamento Dúplex", 
+      "local": "Local",
+      "terrenos-lotes": "Terrenos y Lotes",
+      "terrenos-y-lotes": "Terrenos y Lotes",
+      "departamento-monoambiente": "Departamento Monoambiente",
+      "oficina": "Oficina",
+      "cochera": "Cochera",
+      "casa-duplex": "Casa Dúplex",
+      "departamento-penthouse": "Departamento Penthouse",
+      "casa-triplex": "Casa Triplex",
+      "ph": "PH"
+    }
+    
+    const mappedType = typeMap[propertyType.toLowerCase()] || propertyType
+    return properties.filter(property => 
+      property.property_type.toLowerCase() === mappedType.toLowerCase()
+    )
   }
-  
-  const typeMap: Record<string, string> = {
-    "departamento-estandar": "Departamento Estándar",
-    "casa": "Casa",
-    "departamento-duplex": "Departamento Dúplex",
-    "local": "Local",
-    "terrenos-lotes": "Terrenos y Lotes",
-    "departamento-monoambiente": "Departamento Monoambiente",
-    "oficina": "Oficina"
-  }
-  
-  const mappedType = typeMap[propertyType] || propertyType
-  return properties.filter(property => property.property_type === mappedType)
-}
 
 /**
  * Filtra propiedades por rango de precio

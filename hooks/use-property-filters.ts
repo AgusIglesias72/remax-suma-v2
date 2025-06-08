@@ -1,8 +1,7 @@
 // hooks/use-property-filters.ts
-// RUTA: hooks/use-property-filters.ts
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import type { PropertyType } from "@/lib/types"
 import { 
   applyAllFilters, 
@@ -25,9 +24,24 @@ export function usePropertyFilters({
     ...initialFilters
   })
 
+  // Sincronizar con filtros iniciales cuando cambien (ej: desde URL)
+  useEffect(() => {
+    if (Object.keys(initialFilters).length > 0) {
+      setFilters(prev => ({
+        ...prev,
+        ...initialFilters
+      }))
+    }
+  }, [initialFilters])
+
   // Propiedades filtradas
   const filteredProperties = useMemo(() => {
-    return applyAllFilters(properties, filters)
+    try {
+      return applyAllFilters(properties, filters)
+    } catch (error) {
+      console.error('Error aplicando filtros:', error)
+      return properties // Fallback a mostrar todas las propiedades si hay error
+    }
   }, [properties, filters])
 
   // Centro del mapa basado en propiedades filtradas o ubicación de búsqueda
@@ -38,55 +52,67 @@ export function usePropertyFilters({
     return getPropertiesCenter(filteredProperties)
   }, [filters.location, filteredProperties])
 
-  // Zoom del mapa basado en el radio de búsqueda
+  // Zoom del mapa basado en el radio de búsqueda y cantidad de propiedades
   const mapZoom = useMemo(() => {
-    if (!filters.radius) return 12
-    
-    // Ajustar zoom basado en el radio
-    const zoomLevels: Record<number, number> = {
-      1: 15,
-      2: 14,
-      5: 13,
-      10: 12,
-      15: 11,
-      25: 10,
-      50: 9
+    // Si hay una ubicación específica, usar el radio para calcular zoom
+    if (filters.location && filters.radius) {
+      const zoomLevels: Record<number, number> = {
+        1: 15,
+        2: 14,
+        5: 13,
+        10: 12,
+        15: 11,
+        25: 10,
+        50: 9
+      }
+      return zoomLevels[filters.radius] || 12
     }
     
-    return zoomLevels[filters.radius] || 12
-  }, [filters.radius])
+    // Si hay múltiples propiedades, zoom para mostrar todas
+    if (filteredProperties.length > 1) {
+      return 11
+    }
+    
+    // Para una sola propiedad, zoom más cercano
+    if (filteredProperties.length === 1) {
+      return 15
+    }
+    
+    // Zoom por defecto para Buenos Aires
+    return 12
+  }, [filters.location, filters.radius, filteredProperties.length])
 
   // Setters específicos para cada tipo de filtro
   const setLocation = useCallback((location: LocationData | undefined) => {
-    setFilters((prev: any) => ({ ...prev, location }))
+    setFilters((prev) => ({ ...prev, location }))
   }, [])
 
   const setRadius = useCallback((radius: number) => {
-    setFilters((prev: any) => ({ ...prev, radius }))
+    setFilters((prev) => ({ ...prev, radius }))
   }, [])
 
   const setOperationType = useCallback((operationType: string | undefined) => {
-    setFilters((prev: any) => ({ ...prev, operationType }))
+    setFilters((prev) => ({ ...prev, operationType }))
   }, [])
 
   const setPropertyType = useCallback((propertyType: string | undefined) => {
-    setFilters((prev: any) => ({ ...prev, propertyType }))
+    setFilters((prev) => ({ ...prev, propertyType }))
   }, [])
 
   const setPriceRange = useCallback((priceRange: [number, number] | undefined) => {
-    setFilters((prev: any) => ({ ...prev, priceRange }))
+    setFilters((prev) => ({ ...prev, priceRange }))
   }, [])
 
   const setRooms = useCallback((rooms: number | undefined) => {
-    setFilters((prev: any) => ({ ...prev, rooms }))
+    setFilters((prev) => ({ ...prev, rooms }))
   }, [])
 
   const setBathrooms = useCallback((bathrooms: number | undefined) => {
-    setFilters((prev: any) => ({ ...prev, bathrooms }))
+    setFilters((prev) => ({ ...prev, bathrooms }))
   }, [])
 
   const setFeatures = useCallback((features: string[] | undefined) => {
-    setFilters((prev: any) => ({ ...prev, features }))
+    setFilters((prev) => ({ ...prev, features }))
   }, [])
 
   // Función para limpiar todos los filtros
@@ -96,12 +122,12 @@ export function usePropertyFilters({
 
   // Función para limpiar solo la ubicación
   const clearLocation = useCallback(() => {
-    setFilters((prev: any) => ({ ...prev, location: undefined }))
+    setFilters((prev) => ({ ...prev, location: undefined }))
   }, [])
 
   // Función para actualizar múltiples filtros a la vez
   const updateFilters = useCallback((newFilters: Partial<SearchFilters>) => {
-    setFilters((prev: any) => ({ ...prev, ...newFilters }))
+    setFilters((prev) => ({ ...prev, ...newFilters }))
   }, [])
 
   // Estado de si hay filtros activos
@@ -113,7 +139,7 @@ export function usePropertyFilters({
       filters.priceRange ||
       filters.rooms ||
       filters.bathrooms ||
-      filters.features?.length
+      (filters.features && filters.features.length > 0)
     )
   }, [filters])
 

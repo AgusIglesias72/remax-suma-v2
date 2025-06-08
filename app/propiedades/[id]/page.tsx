@@ -1,6 +1,7 @@
+// app/propiedades/[id]/page.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Bed, Bath, Maximize, MapPin, Heart, Share2, Phone, Car, Calendar, Eye } from "lucide-react"
@@ -12,8 +13,10 @@ import { getPropertyById, getAgentByName, formatPrice, formatSurface, getOperati
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 
-export default function PropertyDetailPage({ params }: { params: { id: string } }) {
-  const property = getPropertyById(params.id)
+export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap the params Promise usando React.use()
+  const { id } = use(params)
+  const property = getPropertyById(id)
   const [isFavorite, setIsFavorite] = useState(false)
 
   if (!property) {
