@@ -350,7 +350,7 @@ export default function PropertiesPage() {
                   
                   <div className="flex items-center bg-gray-100 rounded-lg p-1">
                     <Button
-                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      variant={viewMode === "grid" ? "ghost" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("grid")}
                       className={viewMode === "grid" ? "bg-white shadow-sm" : ""}
@@ -358,7 +358,7 @@ export default function PropertiesPage() {
                       <Grid3X3 size={16} />
                     </Button>
                     <Button
-                      variant={viewMode === "map" ? "default" : "ghost"}
+                      variant={viewMode === "map" ? "ghost" : "ghost"}
                       size="sm"
                       onClick={() => setViewMode("map")}
                       className={viewMode === "map" ? "bg-white shadow-sm" : ""}
@@ -438,7 +438,7 @@ export default function PropertiesPage() {
 
               {/* Contenido (Grid o Mapa) */}
               {viewMode === "map" ? (
-                <div className="h-[calc(100vh-300px)] rounded-lg overflow-hidden border border-gray-200">
+                <div className="h-[calc(100vh-100px)] rounded-lg overflow-hidden border border-gray-200">
                  <GoogleMapsProvider>
                 <PropertyMapWrapper 
                   properties={filteredProperties} 

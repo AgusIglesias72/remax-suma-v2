@@ -6,14 +6,10 @@ import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api"
 import Image from "next/image"
 import Link from "next/link"
 import type { PropertyType } from "@/lib/types"
-import { formatPrice } from "@/lib/data"
 import { useGoogleMaps } from "@/components/providers/google-maps-provider"
-import { BedDouble, Bath,  Car, Star,  Ruler } from "lucide-react" // <- AÑADIR ÍCONOS
-import FavoriteButton from "@/components/favorite-button" // <- AÑADIR BOTÓN DE FAVORITOS
+import { Bed, Bath, Car, Ruler, MapPin } from "lucide-react"
 
-
-// --- Constantes y Helpers fuera del componente para evitar re-declaraciones ---
-
+// --- Constantes y Helpers ---
 const mapContainerStyle = {
   width: "100%",
   height: "100%",
@@ -37,57 +33,45 @@ const mapOptions = {
   ],
 }
 
-/**
- * MEJORA: Unificamos la lógica para obtener la información de la operación.
- * Devuelve tanto el color como el texto para evitar duplicar la lógica del switch.
- */
+// Función mejorada para formatear precios (SIN abreviaciones)
+const formatPrice = (price: number) => {
+  return `$${price.toLocaleString('es-AR')}`
+}
+
+// Información de operación
 const getOperationInfo = (property: PropertyType): { text: string; color: string } => {
-  const operationType = property.operation_type || property.tipo_operacion || (property.price && property.price > 500000 ? 'venta' : 'alquiler');
+  const operationType = property.operation_type || 'Venta';
   
   switch (operationType) {
-    case 'venta':
-    case 'sale':
+    case 'Venta':
       return { text: 'En Venta', color: '#EF4444' }; // Rojo
-    case 'alquiler':
-    case 'rent':
+    case 'Alquiler':
       return { text: 'En Alquiler', color: '#3B82F6' }; // Azul
-    case 'alquiler-temporal':
+    case 'Alquiler Temporal':
       return { text: 'Alquiler Temporal', color: '#10B981' }; // Verde
     default:
-      return { text: 'En Venta', color: '#EF4444' }; // Rojo por defecto
+      return { text: 'En Venta', color: '#EF4444' };
   }
-};
+}
+
+// Ícono del pin personalizado
 const MAP_PIN_PATH = 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5-2.5z';
 
-/**
- * MEJORA: La función para crear el ícono sigue igual, pero ahora se alimenta de getOperationInfo.
- */
 const createCustomMarkerIcon = (color: string, isSelected: boolean) => {
   if (typeof window !== 'undefined' && window.google) {
     return {
       path: MAP_PIN_PATH,
-      
-      // 2. Ajustamos la escala para que se vea bien.
       scale: isSelected ? 1.8 : 1.5,
-      
-      // 3. El color dinámico sigue funcionando igual.
       fillColor: color,
       fillOpacity: 1,
-      
-      // 4. Mantenemos el borde blanco para un buen contraste.
       strokeColor: "#ffffff",
       strokeWeight: 1.5,
-      
-      // 5. ¡CRÍTICO! Le decimos a Google Maps dónde está la punta del pin.
-      // El path tiene un tamaño de 24x24, así que el centro es (12, 12) y la punta (12, 24).
       anchor: new window.google.maps.Point(12, 24),
-      
-      // 6. (Opcional) Ayuda a posicionar etiquetas si las usaras en el futuro.
       labelOrigin: new window.google.maps.Point(12, 9),
     };
   }
   return undefined;
-};
+}
 
 // --- Componente Principal ---
 interface GoogleMapComponentProps {
@@ -95,7 +79,6 @@ interface GoogleMapComponentProps {
   center?: { lat: number; lng: number }
   zoom?: number
   height?: string
-  // AÑADIMOS ESTA PROP
   onPropertyClick?: (property: PropertyType) => void 
 }
 
@@ -104,30 +87,26 @@ export default function GoogleMapComponent({
   center,
   zoom = 12,
   height = "400px",
-  // La recibimos aquí
   onPropertyClick, 
 }: GoogleMapComponentProps) {
   const { isLoaded, loadError } = useGoogleMaps()
   const [selectedProperty, setSelectedProperty] = useState<PropertyType | null>(null)
   const mapRef = useRef<google.maps.Map | null>(null);
 
-  // Filtrar propiedades válidas (sin cambios, ya estaba bien)
+  // Filtrar propiedades válidas
   const validProperties = useMemo(() =>
     properties.filter(p => p.latitude && p.longitude && !isNaN(p.latitude) && !isNaN(p.longitude)),
     [properties]
   );
 
-  /**
-   * MEJORA: Se añade un useEffect para limpiar la selección si la propiedad ya no está en la lista.
-   * Esto evita errores si la lista de propiedades se actualiza desde fuera.
-   */
+  // Limpiar selección si la propiedad ya no está en la lista
   useEffect(() => {
     if (selectedProperty && !validProperties.find(p => p.id === selectedProperty.id)) {
       setSelectedProperty(null);
     }
   }, [validProperties, selectedProperty]);
 
-  // Cálculo del centro del mapa (sin cambios, ya estaba bien)
+  // Cálculo del centro del mapa
   const mapCenter = useMemo(() => {
     if (center) return center;
     if (validProperties.length === 1) {
@@ -141,9 +120,9 @@ export default function GoogleMapComponent({
     return defaultCenter;
   }, [center, validProperties]);
 
-  // Callback onLoad para ajustar límites (sin cambios, ya estaba bien)
+  // Callback onLoad para ajustar límites
   const onLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map; // Guardamos la instancia del mapa
+    mapRef.current = map;
 
     if (validProperties.length > 1 && !center) {
       const bounds = new window.google.maps.LatLngBounds();
@@ -157,32 +136,30 @@ export default function GoogleMapComponent({
     }
   }, [validProperties, center]);
 
-  // Memoizar el ícono para cada marcador
+  // Funciones para manejar eventos
   const getMarkerIcon = (property: PropertyType) => {
     const { color } = getOperationInfo(property);
     const isSelected = selectedProperty?.id === property.id;
     return createCustomMarkerIcon(color, isSelected);
   };
-  
-  /**
-   * MEJORA: Memoizamos las opciones del InfoWindow para no crear un objeto en cada render.
-   */
-  const infoWindowOptions = useMemo(() => ({
-    pixelOffset: typeof window !== 'undefined' && window.google ? new window.google.maps.Size(0, -10) : undefined
-  }), []);
 
-  // Manejadores de eventos (sin cambios)
   const handleMarkerClick = (property: PropertyType) => {
- 
     setSelectedProperty(property);
     
-    // Hacemos que el mapa se mueva suavemente al pin seleccionado
     if (mapRef.current) {
+      // Calcular un offset más sutil para que el InfoWindow sea visible
+      const lat = property.latitude!;
+      const lng = property.longitude!;
+      
+      // Ajuste más sutil - solo unos 80-100 metros al sur
+      const adjustedLat = lat - 0.0008;
+      
       mapRef.current.panTo({
-        lat: property.latitude!,
-        lng: property.longitude!,
+        lat: adjustedLat,
+        lng: lng,
       });
-      // Opcional: Si quieres asegurarte un nivel de zoom cercano
+      
+      // Asegurar un nivel de zoom apropiado
       if (mapRef.current.getZoom()! < 15) {
         mapRef.current.setZoom(15);
       }
@@ -191,13 +168,14 @@ export default function GoogleMapComponent({
     if (onPropertyClick) {
       onPropertyClick(property);
     }
-  };  const handleInfoWindowClose = () => setSelectedProperty(null);
+  };
 
-  // Renderizado condicional (sin cambios, ya estaba bien)
+  const handleInfoWindowClose = () => setSelectedProperty(null);
+
+  // Renderizado condicional
   if (loadError) return <div>Error al cargar el mapa.</div>;
   if (!isLoaded) return <div style={{ height }} className="flex items-center justify-center bg-gray-100">Cargando mapa...</div>;
-  
-  // MEJORA: Se calcula la info de la operación una sola vez para el InfoWindow
+
   const selectedPropertyInfo = selectedProperty ? getOperationInfo(selectedProperty) : null;
 
   return (
@@ -220,152 +198,127 @@ export default function GoogleMapComponent({
         ))}
 
         {selectedProperty && selectedPropertyInfo && (
-  <InfoWindow
-  position={{ lat: selectedProperty.latitude!, lng: selectedProperty.longitude! }}
-  onCloseClick={handleInfoWindowClose}
-  options={infoWindowOptions}
->
-  {/* MEJORA: Contenedor con mejor espaciado y ancho */}
-  <div className="max-w-sm p-1 space-y-2 font-sans">
-    
-    {/* SECCIÓN DE IMAGEN */}
-    {selectedProperty.images?.[0] && (
-      <div className="relative h-40 mb-2 overflow-hidden rounded-lg">
-        <Image src={selectedProperty.images[0]} alt={selectedProperty.title} fill className="object-cover"/>
-      </div>
-    )}
+          <InfoWindow
+            position={{ lat: selectedProperty.latitude!, lng: selectedProperty.longitude! }}
+            onCloseClick={handleInfoWindowClose}
+            options={{
+              pixelOffset: new window.google.maps.Size(0, 240), // Aparecer ARRIBA del pin
+              maxWidth: 320, // Más ancho
+            }}
+          >
+            <div className="relative p-0 m-0 bg-white rounded-lg shadow-lg overflow-hidden" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', width: '300px' }}>
+              {/* Flecha apuntando hacia abajo al pin */}
+              <div 
+                className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full"
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '8px solid transparent',
+                  borderRight: '8px solid transparent',
+                  borderTop: '8px solid white',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                }}
+              ></div>
+              {/* Imagen de la propiedad */}
+              {selectedProperty.images?.[0] && (
+                <div className="relative h-40 w-full">
+                  <img 
+                    src={selectedProperty.images[0]} 
+                    alt={selectedProperty.title}
+                    className="w-full h-full object-cover"
+                    style={{ display: 'block' }}
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span 
+                      className="px-3 py-1.5 text-sm font-semibold text-white rounded-full"
+                      style={{ backgroundColor: selectedPropertyInfo.color }}
+                    >
+                      {selectedPropertyInfo.text}
+                    </span>
+                  </div>
+                </div>
+              )}
 
-    {/* SECCIÓN DE TÍTULO Y FAVORITOS */}
-    <div className="flex items-start justify-between gap-2">
-      <h3 className="text-base font-bold leading-tight text-gray-800">
-        {selectedProperty.title}
-      </h3>
-      {/* FUNCIONALIDAD: Botón de Favoritos */}
-      <FavoriteButton property={selectedProperty} size="sm" />
-    </div>
+              {/* Contenido */}
+              <div className="p-4">
+                {/* Título y precio */}
+                <div className="mb-4">
+                  <h3 className="font-bold text-gray-900 text-base leading-tight mb-2" style={{ margin: 0, lineHeight: '1.3' }}>
+                    {selectedProperty.title}
+                  </h3>
+                  <p className="text-xl font-bold mb-2" style={{ color: selectedPropertyInfo.color, margin: 0 }}>
+                    {formatPrice(selectedProperty.price)}
+                  </p>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <MapPin size={14} className="mr-1" />
+                    <span>{selectedProperty.neighborhood || selectedProperty.address}</span>
+                  </div>
+                </div>
 
-    {/* SECCIÓN DE PRECIO Y OPERACIÓN */}
-    <div>
-      <span 
-        className="px-2 py-1 text-xs font-bold text-white rounded-full"
-        style={{ backgroundColor: selectedPropertyInfo.color }}
-      >
-        {selectedPropertyInfo.text}
-      </span>
-      <p className="mt-2 text-xl font-extrabold text-gray-900" style={{ color: selectedPropertyInfo.color }}>
-        {formatPrice(selectedProperty.price, selectedProperty.currency)}
-      </p>
-    </div>
+                {/* Características */}
+                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                  {selectedProperty.rooms && (
+                    <div className="flex items-center gap-1.5">
+                      <Bed size={14} />
+                      <span>{selectedProperty.rooms} amb</span>
+                    </div>
+                  )}
+                  {selectedProperty.bathrooms && (
+                    <div className="flex items-center gap-1.5">
+                      <Bath size={14} />
+                      <span>{selectedProperty.bathrooms} baños</span>
+                    </div>
+                  )}
+                  {selectedProperty.total_built_surface && (
+                    <div className="flex items-center gap-1.5">
+                      <Ruler size={14} />
+                      <span>{selectedProperty.total_built_surface}m²</span>
+                    </div>
+                  )}
+                  {selectedProperty.parking && (
+                    <div className="flex items-center gap-1.5">
+                      <Car size={14} />
+                      <span>Cochera</span>
+                    </div>
+                  )}
+                </div>
 
-    {/* SECCIÓN DE CARACTERÍSTICAS CON ÍCONOS */}
-    <div className="flex flex-wrap items-center gap-4 pt-2 text-sm text-gray-600 border-t">
-      {selectedProperty.rooms && (
-        <div className="flex items-center gap-1.5">
-          <BedDouble size={16} className="text-gray-500" />
-          <span className="font-medium">{selectedProperty.rooms} amb.</span>
-        </div>
-      )}
-      {selectedProperty.bathrooms && (
-        <div className="flex items-center gap-1.5">
-          <Bath size={16} className="text-gray-500" />
-          <span className="font-medium">{selectedProperty.bathrooms} baños</span>
-        </div>
-      )}
-      {selectedProperty.covered_surface && (
-        <div className="flex items-center gap-1.5">
-          <Ruler size={16} className="text-gray-500" />
-          <span className="font-medium">{selectedProperty.covered_surface}m²</span>
-        </div>
-      )}
-      {selectedProperty.parking && (
-        <div className="flex items-center gap-1.5">
-          <Car size={16} className="text-gray-500" />
-          <span className="font-medium">Cochera</span>
-        </div>
-      )}
-    </div>
-
-    {/* BOTÓN DE ACCIÓN */}
-    <Link 
-      href={`/propiedades/${selectedProperty.id}`} 
-      className="inline-block w-full px-3 py-2 mt-2 text-sm font-semibold text-center text-white rounded-lg transition-opacity hover:opacity-90"
-      style={{ backgroundColor: selectedPropertyInfo.color }}
-    >
-      Ver Detalles de la Propiedad
-    </Link>
-  </div>
-</InfoWindow>
+                {/* Botón de acción */}
+                <Link href={`/propiedades/${selectedProperty.id}`}>
+                  <button 
+                    className="w-full text-white py-3 px-4 rounded text-sm font-semibold hover:opacity-90 transition-opacity"
+                    style={{ 
+                      backgroundColor: selectedPropertyInfo.color,
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Ver Detalles de la Propiedad
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </InfoWindow>
         )}
       </GoogleMap>
 
-      {/* Leyenda y contador (sin cambios) */}
+      {/* Leyenda */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 text-sm">
         <h4 className="font-semibold text-gray-700 mb-2">Leyenda</h4>
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getOperationInfo({
-            operation_type: 'venta',
-            tipo_operacion: "",
-            parking: undefined,
-            id: "",
-            mls_id: "",
-            title: "",
-            description: "",
-            status: "",
-            property_type: "",
-            address: "",
-            city: "",
-            latitude: 0,
-            longitude: 0,
-            rooms: 0,
-            bedrooms: 0,
-            bathrooms: 0,
-            garages: 0,
-            price: 0,
-            currency: "",
-            agent_name: "",
-            days_on_market: 0,
-            created_at: "",
-            listing_date: "",
-            images: [],
-            features: []
-          }).color }}></div>
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <span>En Venta</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getOperationInfo({
-            operation_type: 'alquiler',
-            tipo_operacion: "",
-            parking: undefined,
-            id: "",
-            mls_id: "",
-            title: "",
-            description: "",
-            status: "",
-            property_type: "",
-            address: "",
-            city: "",
-            latitude: 0,
-            longitude: 0,
-            rooms: 0,
-            bedrooms: 0,
-            bathrooms: 0,
-            garages: 0,
-            price: 0,
-            currency: "",
-            agent_name: "",
-            days_on_market: 0,
-            created_at: "",
-            listing_date: "",
-            images: [],
-            features: []
-          }).color }}></div>
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
           <span>En Alquiler</span>
         </div>
       </div>
       
+      {/* Contador de propiedades */}
       {validProperties.length < properties.length && (
          <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3 text-sm text-gray-600">
-           Mostrando {validProperties.length} de {properties.length} propiedades.
+           Mostrando {validProperties.length} de {properties.length} propiedades
          </div>
       )}
     </div>

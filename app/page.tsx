@@ -274,58 +274,161 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <Card className="hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Propiedades Activas</CardTitle>
-                  <Home className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.active_properties}</div>
-                  <p className="text-xs text-muted-foreground">de {stats.total_properties} totales</p>
-                </CardContent>
-              </Card>
 
-              <Card className="hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Agentes</CardTitle>
-                  <Users className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_agents}</div>
-                  <p className="text-xs text-muted-foreground">profesionales</p>
-                </CardContent>
-              </Card>
+{/* Stats Section */}
+<section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+  {/* Background decorativo */}
+  <div className="absolute inset-0 opacity-5">
+    <div className="absolute top-10 left-10 w-32 h-32 bg-red-500 rounded-full blur-3xl"></div>
+    <div className="absolute bottom-10 right-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl"></div>
+    <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-green-500 rounded-full blur-3xl"></div>
+  </div>
 
-              <Card className="hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Ciudades</CardTitle>
-                  <MapIcon className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_cities}</div>
-                  <p className="text-xs text-muted-foreground">ubicaciones</p>
-                </CardContent>
-              </Card>
+  <div className="container mx-auto px-4 relative z-10">
+    {/* Header */}
+    <div className="text-center mb-16">
+      <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        RE/MAX SUMA en números
+      </h2>
+      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        Somos líderes en el mercado inmobiliario con una amplia presencia en Buenos Aires
+      </p>
+    </div>
 
-              <Card className="hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Precio Promedio</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatPrice(stats.average_price, "USD")}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Rango: {formatPrice(stats.price_range.min, "USD")} - {formatPrice(stats.price_range.max, "USD")}
-                  </p>
-                </CardContent>
-              </Card>
+    {/* Stats Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      
+      {/* Propiedades Activas */}
+      <div className="group relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-red-400 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+          <div className="flex items-center justify-between mb-6">
+            <div className="bg-red-100 rounded-full p-4">
+              <Home className="h-8 w-8 text-red-600" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                {stats.active_properties}
+              </div>
+              <div className="text-sm text-gray-500">de {stats.total_properties} totales</div>
             </div>
           </div>
-        </section>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Propiedades Activas</h3>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-red-500 to-red-400 h-2 rounded-full transition-all duration-1000"
+              style={{width: `${(stats.active_properties / stats.total_properties) * 100}%`}}
+            ></div>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            {Math.round((stats.active_properties / stats.total_properties) * 100)}% disponibles
+          </p>
+        </div>
+      </div>
+
+      {/* Agentes */}
+      <div className="group relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+          <div className="flex items-center justify-between mb-6">
+            <div className="bg-blue-100 rounded-full p-4">
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                {stats.total_agents}
+              </div>
+              <div className="text-sm text-gray-500">profesionales</div>
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Agentes Expertos</h3>
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {[1,2,3,4].map((i) => (
+                <div key={i} className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white"></div>
+              ))}
+            </div>
+            <span className="text-sm text-gray-600">+{stats.total_agents - 4} más</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Especializados en la zona norte
+          </p>
+        </div>
+      </div>
+
+      {/* Ciudades */}
+      <div className="group relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-green-400 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+          <div className="flex items-center justify-between mb-6">
+            <div className="bg-green-100 rounded-full p-4">
+              <MapIcon className="h-8 w-8 text-green-600" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+                {stats.total_cities}
+              </div>
+              <div className="text-sm text-gray-500">ubicaciones</div>
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Ciudades Cubiertas</h3>
+          <div className="grid grid-cols-3 gap-1">
+            {['CABA', 'V.López', 'Olivos', 'S.Isidro', 'Martinez', 'Tigre'].map((city, i) => (
+              <div key={i} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded text-center">
+                {city}
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Zona Norte y CABA
+          </p>
+        </div>
+      </div>
+
+      {/* Precio Promedio */}
+      <div className="group relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-purple-400 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+          <div className="flex items-center justify-between mb-6">
+            <div className="bg-purple-100 rounded-full p-4">
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+                {formatPrice(stats.average_price, "USD")}
+              </div>
+              <div className="text-sm text-gray-500">promedio</div>
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Precio Promedio</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Mínimo:</span>
+              <span className="font-medium">{formatPrice(stats.price_range.min, "USD")}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Máximo:</span>
+              <span className="font-medium">{formatPrice(stats.price_range.max, "USD")}</span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1 text-sm text-green-600">
+            <TrendingUp className="h-4 w-4" />
+            <span>Mercado estable</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {/* Bottom CTA */}
+    <div className="text-center mt-16">
+      <div className="inline-flex items-center gap-2 bg-white rounded-full px-8 py-4 shadow-lg">
+        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        <span className="text-gray-700 font-medium">Datos actualizados en tiempo real</span>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* Featured Properties */}
         <section className="py-16 bg-gray-50">

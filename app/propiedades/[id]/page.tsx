@@ -1,223 +1,220 @@
 // app/propiedades/[id]/page.tsx
 "use client"
 
-import { useState, use } from "react"
-import Link from "next/link"
+import { useState } from "react"
+import { notFound } from "next/navigation"
 import Image from "next/image"
-import { ArrowLeft, Bed, Bath, Maximize, MapPin, Heart, Share2, Phone, Car, Calendar, Eye } from "lucide-react"
+import Link from "next/link"
+import { ArrowLeft, MapPin, Bed, Bath, Maximize, Car, Calendar, Eye, Share2, Heart, Currency } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import PropertyMapWrapper from "@/components/property-map-wrapper"
-import { getPropertyById, getAgentByName, formatPrice, formatSurface, getOperationTypeLabel } from "@/lib/data"
+import { Separator } from "@/components/ui/separator"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import PropertyMapWrapper from "@/components/property-map-wrapper"
+import PropertyGallery from "@/components/property-gallery"
+import AgentContactCard from "@/components/agent-contact-card"
+import { allProperties, agents } from "@/lib/data"
 
-export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // Unwrap the params Promise usando React.use()
-  const { id } = use(params)
-  const property = getPropertyById(id)
+interface PropertyDetailPageProps {
+  params: {
+    id: string
+  }
+}
+
+export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
   const [isFavorite, setIsFavorite] = useState(false)
 
+  // Buscar la propiedad
+  const property = allProperties.find(p => p.id === params.id)
   if (!property) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">Propiedad no encontrada</h1>
-            <Link href="/propiedades">
-              <Button className="bg-red-600 hover:bg-red-700">Volver a propiedades</Button>
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    )
+    notFound()
   }
 
-  const agent = getAgentByName(property.agent_name)
-  const displaySurface = property.total_built_surface || property.covered_surface
+  // Buscar el agente (placeholder - en producción vendría de la propiedad)
+  const agent = agents.find(a => a.id === "1") || agents[0]
+
+  // Funciones auxiliares
+  const getOperationTypeLabel = (type: string) => {
+    const map: Record<string, string> = {
+      "Venta": "Venta",
+      "Alquiler": "Alquiler", 
+      "Alquiler Temporal": "Alquiler Temporal"
+    }
+    return map[type] || type
+  }
+
+  const formatPrice = (price: number) => {
+                       
+    return `${property.currency} ${price.toLocaleString('es-AR')}`
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: property.title,
+        text: `Mira esta propiedad en RE/MAX SUMA`,
+        url: window.location.href,
+      })
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      alert('Link copiado al portapapeles')
+    }
+  }
+
+  const handleFavorite = () => {
+    setIsFavorite(!isFavorite)
+    // Aquí iría la lógica para guardar en favoritos
+  }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-
-      <main className="flex-1 bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <Link href="/propiedades" className="inline-flex items-center text-gray-600 hover:text-red-600 mb-6">
-            <ArrowLeft size={16} className="mr-2" /> Volver a resultados
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+          <Link href="/propiedades" className="hover:text-red-600 flex items-center gap-1">
+            <ArrowLeft size={16} />
+            Volver a resultados
           </Link>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="relative h-[400px] md:h-[500px] rounded-lg overflow-hidden mb-6">
-                <Image
-                  src={property.images[0] || "/placeholder.svg"}
-                  alt={property.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <Badge className="bg-red-600 text-white hover:bg-red-700">
-                    {getOperationTypeLabel(property.operation_type)}
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/90 text-gray-800">
-                    {property.property_type}
-                  </Badge>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Columna principal - Información de la propiedad */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Galería de fotos */}
+            <PropertyGallery
+              images={property.images || []}
+              title={property.title}
+              operationType={property.operation_type}
+              propertyType={property.property_type}
+              onShare={handleShare}
+              onFavorite={handleFavorite}
+              isFavorite={isFavorite}
+            />
+
+            {/* Información principal */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              {/* Header con precio y ubicación */}
+              <div className="mb-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        {formatPrice(property.price)}
+                    </h1>
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <MapPin size={16} className="mr-1" />
+                      <span>{property.address}</span>
+                      {property.neighborhood && (
+                        <span className="ml-1">• {property.neighborhood}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge className="bg-red-600 text-white">
+                      {getOperationTypeLabel(property.operation_type)}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="absolute bottom-4 right-4 flex gap-2">
-                  <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white">
-                    <Share2 size={18} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className={`rounded-full ${isFavorite ? "bg-red-600 text-white hover:bg-red-700" : "bg-white/90 hover:bg-white"}`}
-                    onClick={() => setIsFavorite(!isFavorite)}
-                  >
-                    <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
-                  </Button>
+
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  {property.title}
+                </h2>
+
+                {/* Características principales */}
+                <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+                  {property.rooms && (
+                    <div className="flex items-center gap-1">
+                      <Bed size={16} />
+                      <span>{property.rooms} {property.rooms === 1 ? 'ambiente' : 'ambientes'}</span>
+                    </div>
+                  )}
+                  {property.bathrooms && (
+                    <div className="flex items-center gap-1">
+                      <Bath size={16} />
+                      <span>{property.bathrooms} {property.bathrooms === 1 ? 'baño' : 'baños'}</span>
+                    </div>
+                  )}
+                  {property.total_built_surface && (
+                    <div className="flex items-center gap-1">
+                      <Maximize size={16} />
+                      <span>{property.total_built_surface}m²</span>
+                    </div>
+                  )}
+                  {property.parking && (
+                    <div className="flex items-center gap-1">
+                      <Car size={16} />
+                      <span>Cochera</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 mb-8">
-                {property.images.slice(1, 5).map((image, index) => (
-                  <div key={index} className="relative h-24 rounded-lg overflow-hidden">
-                    <Image
-                      src={image || "/placeholder.svg"}
-                      alt={`${property.title} - Imagen ${index + 2}`}
-                      fill
-                      className="object-cover"
-                    />
+              <Separator className="my-6" />
+
+              {/* Tabs con información detallada */}
+              <Tabs defaultValue="descripcion" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="descripcion">Descripción</TabsTrigger>
+                  <TabsTrigger value="caracteristicas">Características</TabsTrigger>
+                  <TabsTrigger value="ubicacion">Ubicación</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="descripcion" className="mt-6">
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700 leading-relaxed">
+                      {property.description || 
+                        `Excelente ${property.property_type.toLowerCase()} ubicado en ${property.neighborhood || 'zona premium'}. 
+                        Esta propiedad cuenta con todas las comodidades que necesitas para vivir cómodamente. 
+                        ${property.rooms ? `Con ${property.rooms} ambientes` : ''} 
+                        ${property.total_built_surface ? ` y ${property.total_built_surface}m² totales` : ''}, 
+                        es ideal para ${property.rooms && property.rooms >= 3 ? 'familias' : 'parejas o personas solas'}.
+                        
+                        La zona cuenta con excelente conectividad, servicios y comercios cercanos. 
+                        Una oportunidad única en el mercado inmobiliario.`
+                      }
+                    </p>
                   </div>
-                ))}
-              </div>
+                </TabsContent>
 
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <div className="flex items-center text-gray-500 text-sm mb-4">
-                  <MapPin size={16} className="mr-1" />
-                  {property.address}, {property.neighborhood ? `${property.neighborhood}, ` : ""}
-                  {property.city}
-                </div>
-
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">{property.title}</h1>
-                <div className="text-2xl font-bold text-red-600 mb-4">
-                  {formatPrice(property.price, property.currency)}
-                </div>
-
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-gray-500" />
-                    <span className="text-sm text-gray-600">{property.days_on_market} días en el mercado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Eye size={16} className="text-gray-500" />
-                    <span className="text-sm text-gray-600">MLS: {property.mls_id}</span>
-                  </div>
-                </div>
-
-                {agent && (
-                  <div className="flex items-center mb-6">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={agent.avatar || "/placeholder.svg"}
-                        alt={agent.name}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <span className="text-sm font-medium">Agente a cargo: {agent.name}</span>
-                        <p className="text-xs text-gray-500">{agent.properties_count} propiedades</p>
+                <TabsContent value="caracteristicas" className="mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-800">Información General</h4>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p>Tipo: {property.property_type}</p>
+                        <p>Operación: {getOperationTypeLabel(property.operation_type)}</p>
+                        <p>Estado: {property.status}</p>
+                        {property.total_built_surface && <p>Superficie: {property.total_built_surface}m²</p>}
+                        {property.rooms && <p>Ambientes: {property.rooms}</p>}
+                        {property.bathrooms && <p>Baños: {property.bathrooms}</p>}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-800">Detalles</h4>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p>Publicado: {new Date(property.listing_date).toLocaleDateString("es-AR")}</p>
+                        <p>ID: {property.id}</p>
+                        {property.parking && <p>Cochera: Sí</p>}
+                        <p>Barrio: {property.neighborhood || 'Información no disponible'}</p>
                       </div>
                     </div>
                   </div>
-                )}
+                </TabsContent>
 
-                <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg mb-6">
-                  {property.rooms > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-700">{property.rooms}</span>
-                      <span className="text-sm text-gray-600">Ambientes</span>
+                <TabsContent value="ubicacion" className="mt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-gray-800 mb-2">Ubicación</h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        {property.address}
+                        {property.neighborhood && `, ${property.neighborhood}`}
+                      </p>
                     </div>
-                  )}
-                  {property.bedrooms > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Bed size={20} className="text-gray-500" />
-                      <span className="text-sm text-gray-600">{property.bedrooms} Dormitorios</span>
-                    </div>
-                  )}
-                  {property.bathrooms > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Bath size={20} className="text-gray-500" />
-                      <span className="text-sm text-gray-600">{property.bathrooms} Baños</span>
-                    </div>
-                  )}
-                  {property.garages > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Car size={20} className="text-gray-500" />
-                      <span className="text-sm text-gray-600">{property.garages} Cocheras</span>
-                    </div>
-                  )}
-                  {displaySurface && (
-                    <div className="flex items-center gap-2">
-                      <Maximize size={20} className="text-gray-500" />
-                      <span className="text-sm text-gray-600">{formatSurface(displaySurface)} Cubiertos</span>
-                    </div>
-                  )}
-                  {property.land_surface && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">{formatSurface(property.land_surface)} Terreno</span>
-                    </div>
-                  )}
-                </div>
-
-                <Tabs defaultValue="descripcion">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="descripcion">Descripción</TabsTrigger>
-                    <TabsTrigger value="caracteristicas">Características</TabsTrigger>
-                    <TabsTrigger value="ubicacion">Ubicación</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="descripcion" className="pt-4">
-                    <p className="text-gray-700 leading-relaxed">{property.description}</p>
-                  </TabsContent>
-                  <TabsContent value="caracteristicas" className="pt-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800">Superficies</h4>
-                        {property.covered_surface && (
-                          <p className="text-sm text-gray-600">
-                            Superficie cubierta: {formatSurface(property.covered_surface)}
-                          </p>
-                        )}
-                        {property.semicovered_surface && (
-                          <p className="text-sm text-gray-600">
-                            Superficie semicubierta: {formatSurface(property.semicovered_surface)}
-                          </p>
-                        )}
-                        {property.uncovered_surface && (
-                          <p className="text-sm text-gray-600">
-                            Superficie descubierta: {formatSurface(property.uncovered_surface)}
-                          </p>
-                        )}
-                        {property.land_surface && (
-                          <p className="text-sm text-gray-600">
-                            Superficie del terreno: {formatSurface(property.land_surface)}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800">Detalles</h4>
-                        <p className="text-sm text-gray-600">Tipo: {property.property_type}</p>
-                        <p className="text-sm text-gray-600">Estado: {property.status}</p>
-                        <p className="text-sm text-gray-600">
-                          Fecha de publicación: {new Date(property.listing_date).toLocaleDateString("es-AR")}
-                        </p>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="ubicacion" className="pt-4">
+                    
                     <div className="h-[300px] rounded-lg overflow-hidden">
                       <PropertyMapWrapper
                         properties={[property]}
@@ -226,60 +223,28 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                         height="300px"
                       />
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-6 sticky top-24">
-                {agent && (
-                  <>
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden">
-                        <Image
-                          src={agent.avatar || "/placeholder.svg"}
-                          alt={agent.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{agent.name}</h3>
-                        <p className="text-sm text-gray-500">Agente Inmobiliario</p>
-                        <p className="text-xs text-gray-400">{agent.properties_count} propiedades</p>
-                      </div>
+                    
+                    <div className="text-sm text-gray-600">
+                      <h5 className="font-medium mb-2">Sobre la zona</h5>
+                      <p>
+                        {property.neighborhood || 'Esta zona'} cuenta con excelente conectividad, 
+                        acceso a transporte público, comercios, colegios y espacios verdes. 
+                        Una ubicación estratégica que combina tranquilidad con fácil acceso a todos los servicios.
+                      </p>
                     </div>
-
-                    <div className="space-y-4">
-                      <Button className="w-full bg-red-600 hover:bg-red-700 gap-2">
-                        <Phone size={16} />
-                        {agent.phone}
-                      </Button>
-
-                      <Button variant="outline" className="w-full">
-                        Enviar mensaje
-                      </Button>
-
-                      <Button variant="outline" className="w-full">
-                        Agendar visita
-                      </Button>
-                    </div>
-                  </>
-                )}
-
-                <div className="mt-6 pt-6 border-t">
-                  <h3 className="font-medium mb-4">¿Interesado en esta propiedad?</h3>
-                  <form className="space-y-4">
-                    <input type="text" placeholder="Nombre completo" className="w-full px-3 py-2 border rounded-md" />
-                    <input type="email" placeholder="Email" className="w-full px-3 py-2 border rounded-md" />
-                    <input type="tel" placeholder="Teléfono" className="w-full px-3 py-2 border rounded-md" />
-                    <textarea placeholder="Mensaje" rows={4} className="w-full px-3 py-2 border rounded-md"></textarea>
-                    <Button className="w-full bg-red-600 hover:bg-red-700">Enviar consulta</Button>
-                  </form>
-                </div>
-              </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
+          </div>
+
+          {/* Sidebar - Información del agente */}
+          <div className="lg:col-span-1">
+            <AgentContactCard 
+              agent={agent}
+              propertyTitle={property.title}
+              propertyId={property.id}
+            />
           </div>
         </div>
       </main>
