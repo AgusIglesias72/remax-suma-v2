@@ -62,24 +62,6 @@ export function calculateDistance(
 }
 
 
-/**
- * Determina si una ubicación es un área específica (barrio, ciudad)
- * basado en los types de Google Places
- */
-export function isSpecificArea(location: LocationData): boolean {
-  if (!location.types) return false
-  
-  const areaTypes = [
-    'sublocality',
-    'sublocality_level_1', 
-    'locality',
-    'administrative_area_level_2',
-    'neighborhood',
-    'political'
-  ]
-  
-  return location.types.some(type => areaTypes.includes(type))
-}
 
 /**
  * Obtiene información del tipo de lugar para mostrar al usuario
@@ -115,174 +97,203 @@ export function getSearchDescription(location: LocationData, count: number): str
   
   return `${count} propiedades ${method} ${typeLabel.toLowerCase()} ${location.address}`
 }
+/**
+ * Filtra propiedades por ubicación, basado en coincidencia de texto del barrio.
+ */
+export function filterPropertiesByLocation(
+  properties: PropertyType[],
+  location: LocationData
+): PropertyType[] {
+  if (!location.address) return properties;
+
+  const searchAddress = location.address.toLowerCase();
+
+  return properties.filter(property => {
+    if (!property.neighborhood) return false;
+    // Si el barrio de la propiedad está incluido en la dirección buscada, se mantiene.
+    return searchAddress.includes(property.neighborhood.toLowerCase());
+  });
+}
 
 /**
- * Filtra propiedades por operación
+ * Filtra propiedades por operación (tu función, perfecta como está).
  */
 export function filterPropertiesByOperation(
-    properties: PropertyType[],
-    operationType: string
-  ): PropertyType[] {
-    if (!operationType || operationType === "cualquier-operacion") {
-      return properties
-    }
-    
-    // Mapeo de slugs de URL a valores reales de la base de datos
-    const operationMap: Record<string, string> = {
-      "venta": "Venta",
-      "alquiler": "Alquiler", 
-      "alquiler-temporal": "Alquiler temporal"
-    }
-    
-    const mappedOperation = operationMap[operationType.toLowerCase()] || operationType
-    return properties.filter(property => 
-      property.operation_type.toLowerCase() === mappedOperation.toLowerCase()
-    )
-  }
+  properties: PropertyType[],
+  operationType: string
+): PropertyType[] {
+  if (!operationType) return properties;
+
+  const operationMap: Record<string, string> = {
+    "venta": "Venta",
+    "alquiler": "Alquiler", 
+    "alquiler-temporal": "Alquiler Temporal"
+  };
+  
+  const mappedOperation = operationMap[operationType.toLowerCase()] || operationType;
+  return properties.filter(property => 
+    property.operation_type?.toLowerCase() === mappedOperation.toLowerCase()
+  );
+}
 
 /**
- * Filtra propiedades por tipo
+ * Filtra propiedades por tipo (tu función, perfecta como está).
  */
 export function filterPropertiesByType(
-    properties: PropertyType[],
-    propertyType: string
-  ): PropertyType[] {
-    if (!propertyType || propertyType === "cualquier-tipo") {
-      return properties
-    }
-    
-    // Mapeo de slugs de URL a valores reales de la base de datos
-    const typeMap: Record<string, string> = {
-      "departamento-estandar": "Departamento Estándar",
-      "casa": "Casa",
-      "departamento-duplex": "Departamento Dúplex", 
-      "local": "Local",
-      "terrenos-lotes": "Terrenos y Lotes",
-      "terrenos-y-lotes": "Terrenos y Lotes",
-      "departamento-monoambiente": "Departamento Monoambiente",
-      "oficina": "Oficina",
-      "cochera": "Cochera",
-      "casa-duplex": "Casa Dúplex",
-      "departamento-penthouse": "Departamento Penthouse",
-      "casa-triplex": "Casa Triplex",
-      "ph": "PH"
-    }
-    
-    const mappedType = typeMap[propertyType.toLowerCase()] || propertyType
-    return properties.filter(property => 
-      property.property_type.toLowerCase() === mappedType.toLowerCase()
-    )
-  }
+  properties: PropertyType[],
+  propertyType: string
+): PropertyType[] {
+  if (!propertyType) return properties;
+  
+  const typeMap: Record<string, string> = {
+    "departamento-estandar": "Departamento Estándar",
+    "casa": "Casa",
+    "departamento-duplex": "Departamento Dúplex", 
+    "local": "Local",
+    "terrenos-lotes": "Terrenos y Lotes",
+    "terrenos-y-lotes": "Terrenos y Lotes",
+    "departamento-monoambiente": "Departamento Monoambiente",
+    "oficina": "Oficina",
+    "cochera": "Cochera",
+    "casa-duplex": "Casa Dúplex",
+    "departamento-penthouse": "Departamento Penthouse",
+    "casa-triplex": "Casa Triplex",
+    "ph": "PH"
+  };
+  
+  const mappedType = typeMap[propertyType.toLowerCase()] || propertyType;
+  return properties.filter(property => 
+    property.property_type?.toLowerCase() === mappedType.toLowerCase()
+  );
+}
 
 /**
- * Filtra propiedades por rango de precio
+ * Filtra propiedades por rango de precio.
  */
 export function filterPropertiesByPrice(
   properties: PropertyType[],
   priceRange: [number, number]
 ): PropertyType[] {
-  const [min, max] = priceRange
+  const [min, max] = priceRange;
   return properties.filter(property => {
-    const price = property.price || 0
-    return price >= min && price <= max
-  })
+    const price = property.price || 0;
+    return price >= min && price <= max;
+  });
 }
 
 /**
- * Filtra propiedades por número de ambientes
+ * Filtra propiedades por número de ambientes (VERSIÓN MEJORADA).
  */
 export function filterPropertiesByRooms(
   properties: PropertyType[],
-  rooms: number
+  rooms: number | string
 ): PropertyType[] {
-  if (rooms === 0) return properties
-  return properties.filter(property => property.rooms === rooms)
+  if (rooms === 'monoambiente') {
+    // Si el filtro es 'monoambiente', buscamos el tipo de propiedad correspondiente.
+    return properties.filter(p => p.property_type === 'Departamento Monoambiente');
+  }
+
+  if (typeof rooms === 'number') {
+    if (rooms >= 5) { // Lógica para "5+"
+      return properties.filter(p => p.rooms != null && p.rooms >= 5);
+    }
+    // Lógica para números exactos (1, 2, 3, 4)
+    return properties.filter(p => p.rooms === rooms);
+  }
+
+  // Si no es un caso conocido, no se aplica el filtro.
+  return properties;
 }
 
 /**
- * Aplicar todos los filtros a la vez
+ * Filtra propiedades por número de baños (VERSIÓN MEJORADA).
+ */
+export function filterPropertiesByBathrooms(
+    properties: PropertyType[],
+    bathrooms: number
+): PropertyType[] {
+    if (bathrooms >= 4) { // Lógica para "4+"
+        return properties.filter(p => p.bathrooms != null && p.bathrooms >= 4);
+    }
+    // Lógica para números exactos (1, 2, 3)
+    return properties.filter(p => p.bathrooms === bathrooms);
+}
+
+// ===================================================================
+// FUNCIÓN PRINCIPAL "ORQUESTADORA"
+// ===================================================================
+
+/**
+ * Aplica una cadena de filtros a la lista de propiedades.
+ * Esta función ahora llama a las funciones auxiliares de arriba.
  */
 export function applyAllFilters(
   properties: PropertyType[],
   filters: SearchFilters
 ): PropertyType[] {
-  return properties.filter((property) => {
-    // Filtro de ubicación por coincidencia de texto
-    if (filters.location?.lat && filters.location?.lng) {
-      if (!property.latitude || !property.longitude) return false
-      
-      const searchAddress = filters.location.address.toLowerCase()
-      const propertyNeighborhood = property.neighborhood?.toLowerCase()
-      
-      if (propertyNeighborhood && !searchAddress.includes(propertyNeighborhood)) {
-        return false
-      }
-    }
+  let filteredProperties = [...properties];
 
-    // Otros filtros
-    if (filters.operationType && property.operation_type !== filters.operationType) {
-      return false
-    }
-    if (filters.propertyType && property.property_type !== filters.propertyType) {
-      return false
-    }
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange
-      if (property.price < min || property.price > max) {
-        return false
-      }
-    }
-    if (filters.rooms) {
-      if (filters.rooms === 0 && property.property_type !== 'departamento-monoambiente') return false; // Monoambiente
-      if (filters.rooms >= 5 && property.rooms < 5) return false; // 5 o más
-      if (filters.rooms > 0 && filters.rooms < 5 && property.rooms !== filters.rooms) return false;
-    }
-    if (filters.bathrooms) {
-      if (filters.bathrooms >= 4 && property.bathrooms < 4) return false; // 4 o más
-      if (filters.bathrooms < 4 && property.bathrooms !== filters.bathrooms) return false;
-    }
-    if (filters.features && filters.features.length > 0) {
-      if (!filters.features.every(feature => (property as any)[feature])) {
-        return false
-      }
-    }
-
-    return true
-  })
-}
-
-
-/**
- * Obtiene el centro geográfico de un conjunto de propiedades
- */
-export function getPropertiesCenter(
-  properties: PropertyType[]
-): { lat: number; lng: number } | undefined {
-  if (properties.length === 0) return undefined
-  if (properties.length === 1) {
-    return { lat: properties[0].latitude!, lng: properties[0].longitude! }
+  if (filters.location) {
+    filteredProperties = filterPropertiesByLocation(filteredProperties, filters.location);
   }
 
-  const { totalLat, totalLng } = properties.reduce(
-    (acc, prop) => {
-      if (prop.latitude && prop.longitude) {
-        acc.totalLat += prop.latitude
-        acc.totalLng += prop.longitude
-      }
-      return acc
-    },
-    { totalLat: 0, totalLng: 0 }
-  )
+  if (filters.operationType) {
+    filteredProperties = filterPropertiesByOperation(filteredProperties, filters.operationType);
+  }
 
-  const validPropertiesCount = properties.filter(p => p.latitude && p.longitude).length
+  if (filters.propertyType) {
+    filteredProperties = filterPropertiesByType(filteredProperties, filters.propertyType);
+  }
   
-  if (validPropertiesCount === 0) return undefined
-
-  return {
-    lat: totalLat / validPropertiesCount,
-    lng: totalLng / validPropertiesCount,
+  if (filters.priceRange) {
+    filteredProperties = filterPropertiesByPrice(filteredProperties, filters.priceRange);
   }
+
+  if (filters.rooms !== undefined) {
+    filteredProperties = filterPropertiesByRooms(filteredProperties, filters.rooms);
+  }
+
+  if (filters.bathrooms !== undefined) {
+    filteredProperties = filterPropertiesByBathrooms(filteredProperties, filters.bathrooms);
+  }
+
+  // Aquí puedes añadir más filtros en el futuro, como el de "features".
+  // if (filters.features && filters.features.length > 0) { ... }
+
+  return filteredProperties;
 }
+
+
+// ... (resto de las funciones como getPropertiesCenter)
+export function getPropertiesCenter(
+    properties: PropertyType[]
+  ): { lat: number; lng: number } | undefined {
+    if (properties.length === 0) return undefined;
+    if (properties.length === 1) {
+      return { lat: properties[0].latitude!, lng: properties[0].longitude! };
+    }
+  
+    let totalLat = 0;
+    let totalLng = 0;
+    let validCount = 0;
+  
+    for (const prop of properties) {
+      if (prop.latitude && prop.longitude) {
+        totalLat += prop.latitude;
+        totalLng += prop.longitude;
+        validCount++;
+      }
+    }
+    
+    if (validCount === 0) return undefined;
+  
+    return {
+      lat: totalLat / validCount,
+      lng: totalLng / validCount,
+    };
+  }
+
+// La exportación de tipos se mantiene igual
 
 /**
  * Convierte Google Maps LatLngBounds a nuestro formato

@@ -9,6 +9,7 @@ export interface AgentType {
 }
 
 export interface PropertyType {
+  features: never[]
   tipo_operacion: string
   parking: any
   id: string
@@ -64,4 +65,17 @@ export interface DatabaseType {
   generated_at: string
   source: string
   version: string
+}
+
+export interface SearchFilters {
+  location?: Location;
+  radius?: number;
+  operationType?: 'venta' | 'alquiler' | 'alquiler-temporal';
+  propertyType?: string;
+  priceRange?: [number, number];
+  // ANTES: rooms?: number;
+  // AHORA: Permitimos string para 'monoambiente'
+  rooms?: number | string; 
+  bathrooms?: number;
+  features?: string[];
 }
