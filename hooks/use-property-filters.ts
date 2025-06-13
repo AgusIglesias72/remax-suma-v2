@@ -20,31 +20,25 @@ export function usePropertyFilters({
   initialFilters = {} 
 }: UsePropertyFiltersProps) {
   const [filters, setFilters] = useState<SearchFilters>({
-    radius: 10, // 10km por defecto
+    radius: 2, // Este radio ya no se usa para filtrar, pero puede servir para el zoom.
     ...initialFilters
   })
 
-  // Sincronizar con filtros iniciales cuando cambien (ej: desde URL)
   useEffect(() => {
     if (Object.keys(initialFilters).length > 0) {
-      setFilters(prev => ({
-        ...prev,
-        ...initialFilters
-      }))
+      setFilters(prev => ({ ...prev, ...initialFilters }))
     }
   }, [initialFilters])
 
-  // Propiedades filtradas
   const filteredProperties = useMemo(() => {
     try {
       return applyAllFilters(properties, filters)
     } catch (error) {
       console.error('Error aplicando filtros:', error)
-      return properties // Fallback a mostrar todas las propiedades si hay error
+      return properties
     }
   }, [properties, filters])
 
-  // Centro del mapa basado en propiedades filtradas o ubicación de búsqueda
   const mapCenter = useMemo(() => {
     if (filters.location) {
       return { lat: filters.location.lat, lng: filters.location.lng }
@@ -52,37 +46,18 @@ export function usePropertyFilters({
     return getPropertiesCenter(filteredProperties)
   }, [filters.location, filteredProperties])
 
-  // Zoom del mapa basado en el radio de búsqueda y cantidad de propiedades
   const mapZoom = useMemo(() => {
-    // Si hay una ubicación específica, usar el radio para calcular zoom
     if (filters.location && filters.radius) {
       const zoomLevels: Record<number, number> = {
-        1: 15,
-        2: 14,
-        5: 13,
-        10: 12,
-        15: 11,
-        25: 10,
-        50: 9
+        1: 15, 2: 14, 5: 13, 10: 12, 15: 11, 25: 10, 50: 9
       }
       return zoomLevels[filters.radius] || 12
     }
-    
-    // Si hay múltiples propiedades, zoom para mostrar todas
-    if (filteredProperties.length > 1) {
-      return 11
-    }
-    
-    // Para una sola propiedad, zoom más cercano
-    if (filteredProperties.length === 1) {
-      return 15
-    }
-    
-    // Zoom por defecto para Buenos Aires
+    if (filteredProperties.length > 1) return 11
+    if (filteredProperties.length === 1) return 15
     return 12
   }, [filters.location, filters.radius, filteredProperties.length])
 
-  // Setters específicos para cada tipo de filtro
   const setLocation = useCallback((location: LocationData | undefined) => {
     setFilters((prev) => ({ ...prev, location }))
   }, [])
@@ -115,22 +90,21 @@ export function usePropertyFilters({
     setFilters((prev) => ({ ...prev, features }))
   }, [])
 
-  // Función para limpiar todos los filtros
   const clearFilters = useCallback(() => {
-    setFilters({ radius: 10 })
+    setFilters({ radius: 2 })
   }, [])
 
-  // Función para limpiar solo la ubicación
   const clearLocation = useCallback(() => {
-    setFilters((prev) => ({ ...prev, location: undefined }))
+    setFilters((prev) => {
+      const { location, ...rest } = prev
+      return rest
+    })
   }, [])
 
-  // Función para actualizar múltiples filtros a la vez
   const updateFilters = useCallback((newFilters: Partial<SearchFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }))
   }, [])
 
-  // Estado de si hay filtros activos
   const hasActiveFilters = useMemo(() => {
     return !!(
       filters.location ||
@@ -143,30 +117,20 @@ export function usePropertyFilters({
     )
   }, [filters])
 
-  // Estadísticas de los resultados
   const stats = useMemo(() => {
     const total = properties.length
     const filtered = filteredProperties.length
     const percentage = total > 0 ? Math.round((filtered / total) * 100) : 0
-    
-    return {
-      total,
-      filtered,
-      percentage,
-      hasResults: filtered > 0
-    }
+    return { total, filtered, percentage, hasResults: filtered > 0 }
   }, [properties.length, filteredProperties.length])
 
   return {
-    // Estado
     filters,
     filteredProperties,
     mapCenter,
     mapZoom,
     stats,
     hasActiveFilters,
-    
-    // Setters individuales
     setLocation,
     setRadius,
     setOperationType,
@@ -175,13 +139,9 @@ export function usePropertyFilters({
     setRooms,
     setBathrooms,
     setFeatures,
-    
-    // Funciones de utilidad
     updateFilters,
     clearFilters,
     clearLocation,
-    
-    // Para compatibilidad con componentes existentes
     setFilters
   }
 }

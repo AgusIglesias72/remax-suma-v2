@@ -1,13 +1,16 @@
 // components/google-map.tsx
 "use client"
 
-import { useCallback, useState, useMemo, useEffect } from "react"
+import { useCallback, useState, useMemo, useEffect, useRef } from "react"
 import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api"
 import Image from "next/image"
 import Link from "next/link"
 import type { PropertyType } from "@/lib/types"
 import { formatPrice } from "@/lib/data"
 import { useGoogleMaps } from "@/components/providers/google-maps-provider"
+import { BedDouble, Bath,  Car, Star,  Ruler } from "lucide-react" // <- AÑADIR ÍCONOS
+import FavoriteButton from "@/components/favorite-button" // <- AÑADIR BOTÓN DE FAVORITOS
+
 
 // --- Constantes y Helpers fuera del componente para evitar re-declaraciones ---
 
@@ -106,6 +109,7 @@ export default function GoogleMapComponent({
 }: GoogleMapComponentProps) {
   const { isLoaded, loadError } = useGoogleMaps()
   const [selectedProperty, setSelectedProperty] = useState<PropertyType | null>(null)
+  const mapRef = useRef<google.maps.Map | null>(null);
 
   // Filtrar propiedades válidas (sin cambios, ya estaba bien)
   const validProperties = useMemo(() =>
@@ -139,6 +143,8 @@ export default function GoogleMapComponent({
 
   // Callback onLoad para ajustar límites (sin cambios, ya estaba bien)
   const onLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map; // Guardamos la instancia del mapa
+
     if (validProperties.length > 1 && !center) {
       const bounds = new window.google.maps.LatLngBounds();
       validProperties.forEach(p => bounds.extend({ lat: p.latitude!, lng: p.longitude! }));
@@ -167,8 +173,21 @@ export default function GoogleMapComponent({
 
   // Manejadores de eventos (sin cambios)
   const handleMarkerClick = (property: PropertyType) => {
+ 
     setSelectedProperty(property);
-    // Si la función fue pasada como prop, la llamamos
+    
+    // Hacemos que el mapa se mueva suavemente al pin seleccionado
+    if (mapRef.current) {
+      mapRef.current.panTo({
+        lat: property.latitude!,
+        lng: property.longitude!,
+      });
+      // Opcional: Si quieres asegurarte un nivel de zoom cercano
+      if (mapRef.current.getZoom()! < 15) {
+        mapRef.current.setZoom(15);
+      }
+    }
+
     if (onPropertyClick) {
       onPropertyClick(property);
     }
@@ -201,41 +220,81 @@ export default function GoogleMapComponent({
         ))}
 
         {selectedProperty && selectedPropertyInfo && (
-          <InfoWindow
-            position={{ lat: selectedProperty.latitude!, lng: selectedProperty.longitude! }}
-            onCloseClick={handleInfoWindowClose}
-            options={infoWindowOptions}
-          >
-            {/* El contenido del InfoWindow ahora es más limpio */}
-            <div className="max-w-xs">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-sm flex-1 line-clamp-2 leading-tight">{selectedProperty.title}</h3>
-                <span className="px-2 py-1 text-xs font-medium text-white rounded-full whitespace-nowrap" style={{ backgroundColor: selectedPropertyInfo.color }}>
-                  {selectedPropertyInfo.text}
-                </span>
-              </div>
+  <InfoWindow
+  position={{ lat: selectedProperty.latitude!, lng: selectedProperty.longitude! }}
+  onCloseClick={handleInfoWindowClose}
+  options={infoWindowOptions}
+>
+  {/* MEJORA: Contenedor con mejor espaciado y ancho */}
+  <div className="max-w-sm p-1 space-y-2 font-sans">
+    
+    {/* SECCIÓN DE IMAGEN */}
+    {selectedProperty.images?.[0] && (
+      <div className="relative h-40 mb-2 overflow-hidden rounded-lg">
+        <Image src={selectedProperty.images[0]} alt={selectedProperty.title} fill className="object-cover"/>
+      </div>
+    )}
 
-              {selectedProperty.images?.[0] && (
-                <div className="relative h-24 mb-3 rounded-lg overflow-hidden">
-                  <Image src={selectedProperty.images[0]} alt={selectedProperty.title} fill className="object-cover"/>
-                </div>
-              )}
+    {/* SECCIÓN DE TÍTULO Y FAVORITOS */}
+    <div className="flex items-start justify-between gap-2">
+      <h3 className="text-base font-bold leading-tight text-gray-800">
+        {selectedProperty.title}
+      </h3>
+      {/* FUNCIONALIDAD: Botón de Favoritos */}
+      <FavoriteButton property={selectedProperty} size="sm" />
+    </div>
 
-              <p className="font-bold text-base mb-2" style={{ color: selectedPropertyInfo.color }}>
-                {formatPrice(selectedProperty.price, selectedProperty.currency)}
-              </p>
+    {/* SECCIÓN DE PRECIO Y OPERACIÓN */}
+    <div>
+      <span 
+        className="px-2 py-1 text-xs font-bold text-white rounded-full"
+        style={{ backgroundColor: selectedPropertyInfo.color }}
+      >
+        {selectedPropertyInfo.text}
+      </span>
+      <p className="mt-2 text-xl font-extrabold text-gray-900" style={{ color: selectedPropertyInfo.color }}>
+        {formatPrice(selectedProperty.price, selectedProperty.currency)}
+      </p>
+    </div>
 
-              <p className="text-xs text-gray-600 mb-2">📍 {selectedProperty.address || `${selectedProperty.city}, ${selectedProperty.neighborhood || 'Buenos Aires'}`}</p>
+    {/* SECCIÓN DE CARACTERÍSTICAS CON ÍCONOS */}
+    <div className="flex flex-wrap items-center gap-4 pt-2 text-sm text-gray-600 border-t">
+      {selectedProperty.rooms && (
+        <div className="flex items-center gap-1.5">
+          <BedDouble size={16} className="text-gray-500" />
+          <span className="font-medium">{selectedProperty.rooms} amb.</span>
+        </div>
+      )}
+      {selectedProperty.bathrooms && (
+        <div className="flex items-center gap-1.5">
+          <Bath size={16} className="text-gray-500" />
+          <span className="font-medium">{selectedProperty.bathrooms} baños</span>
+        </div>
+      )}
+      {selectedProperty.covered_surface && (
+        <div className="flex items-center gap-1.5">
+          <Ruler size={16} className="text-gray-500" />
+          <span className="font-medium">{selectedProperty.covered_surface}m²</span>
+        </div>
+      )}
+      {selectedProperty.parking && (
+        <div className="flex items-center gap-1.5">
+          <Car size={16} className="text-gray-500" />
+          <span className="font-medium">Cochera</span>
+        </div>
+      )}
+    </div>
 
-              <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-3">
-                {/* ...características... */}
-              </div>
-
-              <Link href={`/propiedades/${selectedProperty.id}`} className="inline-block w-full text-center py-2 px-3 text-xs font-medium text-white rounded-md transition-opacity hover:opacity-90" style={{ backgroundColor: selectedPropertyInfo.color }}>
-                Ver Detalles
-              </Link>
-            </div>
-          </InfoWindow>
+    {/* BOTÓN DE ACCIÓN */}
+    <Link 
+      href={`/propiedades/${selectedProperty.id}`} 
+      className="inline-block w-full px-3 py-2 mt-2 text-sm font-semibold text-center text-white rounded-lg transition-opacity hover:opacity-90"
+      style={{ backgroundColor: selectedPropertyInfo.color }}
+    >
+      Ver Detalles de la Propiedad
+    </Link>
+  </div>
+</InfoWindow>
         )}
       </GoogleMap>
 
