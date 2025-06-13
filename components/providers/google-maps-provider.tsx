@@ -30,43 +30,59 @@ interface GoogleMapsProviderProps {
 export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
+  // ✅ CORRECCIÓN: Llamar el hook SIEMPRE, antes de cualquier return condicional
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: apiKey || '', // Proporcionar string vacío si no hay API key
+    libraries,
+    preventGoogleFontsLoading: true, // Opcional: prevenir carga de fuentes
+  })
+
+  // ✅ Manejar el caso de API key faltante DESPUÉS del hook
   if (!apiKey) {
-    // Si no hay API key, mostramos un error en consola y proveemos un estado de error.
     console.error('❌ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not defined')
     return (
-      <GoogleMapsContext.Provider value={{ isLoaded: false, loadError: new Error('Google Maps API key is not defined') }}>
+      <GoogleMapsContext.Provider value={{ 
+        isLoaded: false, 
+        loadError: new Error('Google Maps API key is not defined') 
+      }}>
         {children}
       </GoogleMapsContext.Provider>
     )
   }
 
-  // 1. Usamos el hook `useLoadScript` para manejar la carga del script.
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey,
-    libraries,
-  })
+  // ✅ Manejar errores de carga
+  if (loadError) {
+    console.error('❌ Error loading Google Maps:', loadError)
+    return (
+      <GoogleMapsContext.Provider value={{ isLoaded: false, loadError }}>
+        <div className="text-center p-4">
+          <div className="text-red-600 mb-2">Error al cargar Google Maps</div>
+          <div className="text-sm text-gray-600">{loadError.message}</div>
+        </div>
+        {children}
+      </GoogleMapsContext.Provider>
+    )
+  }
 
-  // 2. Ya no necesitamos el componente <LoadScript>.
-  // Simplemente envolvemos a los children con nuestro Provider,
-  // pasándole los valores que nos devuelve el hook.
+  // ✅ Estado de carga
+  if (!isLoaded) {
+    return (
+      <GoogleMapsContext.Provider value={{ isLoaded, loadError }}>
+        <div className="flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-gray-600">Cargando Google Maps...</p>
+          </div>
+        </div>
+        {children}
+      </GoogleMapsContext.Provider>
+    )
+  }
+
+  // ✅ Éxito: Google Maps cargado correctamente
   return (
     <GoogleMapsContext.Provider value={{ isLoaded, loadError }}>
-      {/* Mostramos un loader mientras carga, o el error si falla */}
-      {!isLoaded && !loadError && (
-        <div className="google-maps-loading">
-           <div className="text-center">
-             <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-             <p className="text-sm text-gray-600">Cargando Google Maps...</p>
-           </div>
-         </div>
-      )}
-      
-      {/* Una vez cargado, renderizamos los componentes hijos */}
-      {isLoaded && !loadError && children}
-
-      {/* Si hay un error, puedes mostrar un mensaje */}
-      {loadError && <div>Error al cargar Google Maps.</div>}
-
+      {children}
     </GoogleMapsContext.Provider>
   )
 }
