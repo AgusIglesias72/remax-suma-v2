@@ -2417,6 +2417,6 @@ export const getPropertyTypeLabel = (propertyType: string): string => {
 
 // Exportar datos para compatibilidad con componentes existentes
 export const allProperties = mockDatabase.properties
-export const featuredProperties = mockDatabase.properties.slice(0, 3)
+export const featuredProperties = mockDatabase.properties.slice(1, 4)
 export const agents = mockDatabase.agents
 export const stats = mockDatabase.stats
