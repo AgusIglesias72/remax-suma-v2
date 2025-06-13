@@ -326,7 +326,8 @@ export default function GoogleMapComponent({
             days_on_market: 0,
             created_at: "",
             listing_date: "",
-            images: []
+            images: [],
+            features: []
           }).color }}></div>
           <span>En Venta</span>
         </div>
@@ -355,7 +356,8 @@ export default function GoogleMapComponent({
             days_on_market: 0,
             created_at: "",
             listing_date: "",
-            images: []
+            images: [],
+            features: []
           }).color }}></div>
           <span>En Alquiler</span>
         </div>
