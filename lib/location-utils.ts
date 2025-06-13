@@ -98,7 +98,7 @@ export function getSearchDescription(location: LocationData, count: number): str
   return `${count} propiedades ${method} ${typeLabel.toLowerCase()} ${location.address}`
 }
 /**
- * Filtra propiedades por ubicación, basado en coincidencia de texto del barrio.
+ * Filtra propiedades por ubicación usando bounds geográficos o texto
  */
 export function filterPropertiesByLocation(
   properties: PropertyType[],
@@ -106,12 +106,52 @@ export function filterPropertiesByLocation(
 ): PropertyType[] {
   if (!location.address) return properties;
 
-  const searchAddress = location.address.toLowerCase();
+  // Si tenemos bounds geográficos, filtrar por coordenadas (MÁS PRECISO)
+  if (location.bounds) {
+    return properties.filter(property => {
+      // Verificar que la propiedad tenga coordenadas válidas
+      if (!property.latitude || !property.longitude || 
+          isNaN(property.latitude) || isNaN(property.longitude)) {
+        return false;
+      }
 
+      // Usar la función isPointInBounds que ya tienes
+      return isPointInBounds(
+        property.latitude, 
+        property.longitude, 
+        location.bounds as { north: number; south: number; east: number; west: number; }
+      );
+    });
+  }
+
+  // Si no hay bounds, usar radio de distancia como fallback
+  if (location.lat && location.lng) {
+    const radius = 2; // 2km por defecto
+    return properties.filter(property => {
+      if (!property.latitude || !property.longitude) return false;
+      
+      const distance = calculateDistance(
+        { lat: location.lat, lng: location.lng },
+        { lat: property.latitude, lng: property.longitude }
+      );
+      
+      return distance <= radius;
+    });
+  }
+
+  // Como último recurso, filtrar por texto del barrio
+  const searchAddress = location.address.toLowerCase();
   return properties.filter(property => {
     if (!property.neighborhood) return false;
-    // Si el barrio de la propiedad está incluido en la dirección buscada, se mantiene.
-    return searchAddress.includes(property.neighborhood.toLowerCase());
+    
+    // Buscar coincidencias más flexibles
+    const neighborhood = property.neighborhood.toLowerCase();
+    const addressParts = searchAddress.split(',').map(part => part.trim());
+    
+    // Verificar si alguna parte de la dirección coincide con el barrio
+    return addressParts.some(part => 
+      neighborhood.includes(part) || part.includes(neighborhood)
+    );
   });
 }
 
@@ -233,9 +273,11 @@ export function applyAllFilters(
 ): PropertyType[] {
   let filteredProperties = [...properties];
 
+  
   if (filters.location) {
     filteredProperties = filterPropertiesByLocation(filteredProperties, filters.location);
   }
+    
 
   if (filters.operationType) {
     filteredProperties = filterPropertiesByOperation(filteredProperties, filters.operationType);
