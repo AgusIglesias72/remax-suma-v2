@@ -1,62 +1,44 @@
+
+// components/property-card.tsx - VERSIÓN ACTUALIZADA CON FAVORITOS
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Bed, Bath, Maximize, Heart, ChevronLeft, ChevronRight, Car, MapPin, Home } from "lucide-react"
+import { Bed, Bath, Maximize, ChevronLeft, ChevronRight, Car, MapPin, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { PropertyType } from "@/lib/types"
 import { formatPrice, formatSurface, getAgentByName, getOperationTypeLabel } from "@/lib/data"
+import FavoriteButton from "@/components/favorite-button"
 
 interface PropertyCardProps {
   property: PropertyType
+  showFavoriteButton?: boolean
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({ property, showFavoriteButton = true }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const agent = getAgentByName(property.agent_name)
 
-  // Auto-carousel effect when hovered
-  useEffect(() => {
-    if (!isHovered || property.images.length <= 1) return
-
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex === property.images.length - 1 ? 0 : prevIndex + 1))
-    }, 2000) // Change image every 2 seconds
-
-    return () => clearInterval(interval)
-  }, [isHovered, property.images.length])
-
-  const nextImage = (e: React.MouseEvent) => {
+  const nextImage = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (currentImageIndex < property.images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1)
-    } else {
-      setCurrentImageIndex(0)
-    }
-  }
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === property.images.length - 1 ? 0 : prevIndex + 1
+    )
+  }, [property.images.length])
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1)
-    } else {
-      setCurrentImageIndex(property.images.length - 1)
-    }
-  }
-
-  const toggleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsFavorite(!isFavorite)
-  }
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? property.images.length - 1 : prevIndex - 1
+    )
+  }, [property.images.length])
 
   const displaySurface = property.total_built_surface || property.covered_surface
 
@@ -84,13 +66,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             </Badge>
           </div>
 
-          {/* Manual carousel controls - only show on hover */}
-          {property.images.length > 1 && (
-            <div className="absolute inset-0 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Manual carousel controls */}
+          {property.images.length > 1 && isHovered && (
+            <div className="absolute inset-0 flex items-center justify-between opacity-100 transition-opacity">
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-8 w-8 rounded-full bg-white/80 hover:bg-white ml-2"
+                className="h-8 w-8 rounded-full bg-white/90 hover:bg-white ml-2"
                 onClick={prevImage}
               >
                 <ChevronLeft size={16} />
@@ -99,7 +81,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-8 w-8 rounded-full bg-white/80 hover:bg-white mr-2"
+                className="h-8 w-8 rounded-full bg-white/90 hover:bg-white mr-2"
                 onClick={nextImage}
               >
                 <ChevronRight size={16} />
@@ -121,17 +103,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </Link>
 
-        <Button
-          variant="secondary"
-          size="icon"
-          className={`absolute top-3 right-3 h-8 w-8 rounded-full transition-all ${
-            isFavorite ? "bg-red-600 text-white hover:bg-red-700" : "bg-white/80 hover:bg-white"
-          }`}
-          onClick={toggleFavorite}
-        >
-          <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
-          <span className="sr-only">Favorito</span>
-        </Button>
+        {/* Botón de favoritos */}
+        {showFavoriteButton && (
+          <div className="absolute top-3 right-3">
+            <FavoriteButton property={property} />
+          </div>
+        )}
       </div>
 
       <div className="p-4">

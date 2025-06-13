@@ -1,7 +1,7 @@
-// app/page.tsx
+// app/page.tsx - VERSIÓN CORREGIDA PARA RESOLVER EL ERROR DE SELECT
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -17,20 +17,87 @@ import { formatPrice } from "@/lib/data"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 
+// Componente de Select seguro para hidratación
+function SafeSelect({ 
+  value, 
+  onValueChange, 
+  placeholder, 
+  children, 
+  className = "",
+  defaultValue = "" 
+}: {
+  value: string
+  onValueChange: (value: string) => void
+  placeholder?: string
+  children: React.ReactNode
+  className?: string
+  defaultValue?: string
+}) {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    // Renderizar una versión estática durante SSR
+    return (
+      <div className={`flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs ${className}`}>
+        <span className="text-muted-foreground">{placeholder}</span>
+        <svg 
+          width="15" 
+          height="15" 
+          viewBox="0 0 15 15" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4 opacity-50"
+        >
+          <path 
+            d="m4.5 6 3 3 3-3" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    )
+  }
+
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {children}
+      </SelectContent>
+    </Select>
+  )
+}
+
 export default function HomePage() {
   const router = useRouter()
+  
+  // Inicializar estados con valores por defecto idénticos en server y client
   const [operationType, setOperationType] = useState("venta")
   const [propertyType, setPropertyType] = useState("cualquier-tipo")
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLocationSelect = (location: LocationData) => {
     setSelectedLocation(location)
   }
 
   const handleSearch = () => {
+    if (!mounted) return
+    
     const params = new URLSearchParams()
     
-    // Agregar filtros básicos si no son los valores por defecto
     if (operationType && operationType !== "venta") {
       params.set("operacion", operationType)
     }
@@ -38,27 +105,26 @@ export default function HomePage() {
       params.set("tipo", propertyType.replace(" ", "-").toLowerCase())
     }
     
-    // Agregar información de ubicación si está disponible
     if (selectedLocation) {
       params.set("ubicacion", selectedLocation.address)
       params.set("lat", selectedLocation.lat.toString())
       params.set("lng", selectedLocation.lng.toString())
-      // Radio por defecto para búsquedas desde home
       params.set("radio", "10")
     }
     
-    // Redirigir a la página de propiedades con los parámetros
     const queryString = params.toString()
     router.push(`/propiedades${queryString ? `?${queryString}` : ''}`)
   }
 
   const handleCitySearch = (city: string) => {
+    if (!mounted) return
     const params = new URLSearchParams()
     params.set("ciudad", city.toLowerCase().replace(" ", "-"))
     router.push(`/propiedades?${params.toString()}`)
   }
 
   const handlePropertyTypeSearch = (type: string) => {
+    if (!mounted) return
     const params = new URLSearchParams()
     const formattedType = type.toLowerCase()
       .replace("departamento estándar", "departamento-estandar")
@@ -71,13 +137,14 @@ export default function HomePage() {
   }
 
   const handleOperationTypeSearch = (operation: string) => {
+    if (!mounted) return
     const params = new URLSearchParams()
     params.set("operacion", operation.toLowerCase())
     router.push(`/propiedades?${params.toString()}`)
   }
 
   const handleQuickSearch = () => {
-    // Búsqueda rápida sin filtros específicos
+    if (!mounted) return
     router.push('/propiedades')
   }
 
@@ -106,30 +173,32 @@ export default function HomePage() {
 
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
               <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <Select value={operationType} onValueChange={setOperationType}>
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <SelectValue placeholder="Operación" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="venta">Venta</SelectItem>
-                    <SelectItem value="alquiler">Alquiler</SelectItem>
-                    <SelectItem value="alquiler-temporal">Alquiler Temporal</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Select de Operación - CON HIDRATACIÓN SEGURA */}
+                <SafeSelect
+                  value={operationType}
+                  onValueChange={setOperationType}
+                  placeholder="Operación"
+                  className="w-full md:w-[180px]"
+                >
+                  <SelectItem value="venta">Venta</SelectItem>
+                  <SelectItem value="alquiler">Alquiler</SelectItem>
+                  <SelectItem value="alquiler-temporal">Alquiler Temporal</SelectItem>
+                </SafeSelect>
 
-                <Select value={propertyType} onValueChange={setPropertyType}>
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cualquier-tipo">Cualquier tipo</SelectItem>
-                    <SelectItem value="departamento-estandar">Departamento Estándar</SelectItem>
-                    <SelectItem value="casa">Casa</SelectItem>
-                    <SelectItem value="departamento-duplex">Departamento Dúplex</SelectItem>
-                    <SelectItem value="local">Local</SelectItem>
-                    <SelectItem value="terrenos-lotes">Terrenos y Lotes</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Select de Tipo de Propiedad - CON HIDRATACIÓN SEGURA */}
+                <SafeSelect
+                  value={propertyType}
+                  onValueChange={setPropertyType}
+                  placeholder="Tipo"
+                  className="w-full md:w-[180px]"
+                >
+                  <SelectItem value="cualquier-tipo">Cualquier tipo</SelectItem>
+                  <SelectItem value="departamento-estandar">Departamento Estándar</SelectItem>
+                  <SelectItem value="casa">Casa</SelectItem>
+                  <SelectItem value="departamento-duplex">Departamento Dúplex</SelectItem>
+                  <SelectItem value="local">Local</SelectItem>
+                  <SelectItem value="terrenos-lotes">Terrenos y Lotes</SelectItem>
+                </SafeSelect>
 
                 <div className="flex-1">
                   <SearchAutocomplete
@@ -142,6 +211,7 @@ export default function HomePage() {
                 <Button 
                   className="bg-red-600 hover:bg-red-700 w-full md:w-auto gap-2"
                   onClick={handleSearch}
+                  disabled={!mounted}
                 >
                   <Search size={18} />
                   Buscar
@@ -149,7 +219,7 @@ export default function HomePage() {
               </div>
               
               {/* Mostrar ubicación seleccionada */}
-              {selectedLocation && (
+              {selectedLocation && mounted && (
                 <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
                   <span>📍 Buscarás cerca de: <strong>{selectedLocation.address}</strong></span>
                   <Button 
@@ -166,21 +236,37 @@ export default function HomePage() {
               {/* Búsquedas rápidas */}
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
                 <span className="text-sm text-gray-600 mr-2">Búsquedas populares:</span>
-                <Button variant="link" size="sm" onClick={() => handleOperationTypeSearch("venta")} className="h-auto p-0 text-red-600">
+                <button 
+                  onClick={() => handleOperationTypeSearch("venta")} 
+                  className="text-sm text-red-600 hover:underline"
+                  disabled={!mounted}
+                >
                   Propiedades en venta
-                </Button>
+                </button>
                 <span className="text-gray-300">•</span>
-                <Button variant="link" size="sm" onClick={() => handleCitySearch("Palermo")} className="h-auto p-0 text-red-600">
+                <button 
+                  onClick={() => handleCitySearch("Palermo")} 
+                  className="text-sm text-red-600 hover:underline"
+                  disabled={!mounted}
+                >
                   Palermo
-                </Button>
+                </button>
                 <span className="text-gray-300">•</span>
-                <Button variant="link" size="sm" onClick={() => handlePropertyTypeSearch("Casa")} className="h-auto p-0 text-red-600">
+                <button 
+                  onClick={() => handlePropertyTypeSearch("Casa")} 
+                  className="text-sm text-red-600 hover:underline"
+                  disabled={!mounted}
+                >
                   Casas
-                </Button>
+                </button>
                 <span className="text-gray-300">•</span>
-                <Button variant="link" size="sm" onClick={handleQuickSearch} className="h-auto p-0 text-red-600">
+                <button 
+                  onClick={handleQuickSearch} 
+                  className="text-sm text-red-600 hover:underline"
+                  disabled={!mounted}
+                >
                   Ver todas
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -266,6 +352,7 @@ export default function HomePage() {
               <Button
                 onClick={() => handleOperationTypeSearch("venta")}
                 className="h-32 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                disabled={!mounted}
               >
                 <Home size={32} />
                 <span className="text-lg font-semibold">Comprar</span>
@@ -275,6 +362,7 @@ export default function HomePage() {
               <Button
                 onClick={() => handleOperationTypeSearch("alquiler")}
                 className="h-32 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                disabled={!mounted}
               >
                 <MapIcon size={32} />
                 <span className="text-lg font-semibold">Alquilar</span>
@@ -284,6 +372,7 @@ export default function HomePage() {
               <Button
                 onClick={handleQuickSearch}
                 className="h-32 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                disabled={!mounted}
               >
                 <Search size={32} />
                 <span className="text-lg font-semibold">Explorar</span>
@@ -304,6 +393,7 @@ export default function HomePage() {
                   key={city}
                   onClick={() => handleCitySearch(city)}
                   className="group relative h-32 rounded-lg overflow-hidden shadow-md bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all cursor-pointer hover:shadow-lg transform hover:scale-105"
+                  disabled={!mounted}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-white">
@@ -331,6 +421,7 @@ export default function HomePage() {
                     key={type}
                     onClick={() => handlePropertyTypeSearch(type)}
                     className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all text-center group cursor-pointer border border-gray-100 hover:border-red-200"
+                    disabled={!mounted}
                   >
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200 transition-colors">
                       <Home className="text-red-600" size={28} />
