@@ -1,11 +1,11 @@
 // app/propiedades/[id]/page.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, MapPin, Bed, Bath, Maximize, Car, Calendar, Eye, Share2, Heart, Currency } from "lucide-react"
+import { ArrowLeft, MapPin, Bed, Bath, Maximize, Car, Calendar, Eye, Share2, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,20 +16,68 @@ import PropertyMapWrapper from "@/components/property-map-wrapper"
 import PropertyGallery from "@/components/property-gallery"
 import AgentContactCard from "@/components/agent-contact-card"
 import { allProperties, agents } from "@/lib/data"
+import type { PropertyType } from "@/lib/types"
 
 interface PropertyDetailPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
   const [isFavorite, setIsFavorite] = useState(false)
+  const [property, setProperty] = useState<PropertyType | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Buscar la propiedad
-  const property = allProperties.find(p => p.id === params.id)
-  if (!property) {
-    notFound()
+  // Efecto para cargar la propiedad cuando se resuelvan los params
+  useEffect(() => {
+    const loadProperty = async () => {
+      try {
+        const resolvedParams = await params
+        const foundProperty = allProperties.find(p => p.id === resolvedParams.id)
+        
+        if (!foundProperty) {
+          notFound()
+        }
+        
+        setProperty(foundProperty)
+      } catch (error) {
+        console.error('Error loading property:', error)
+        notFound()
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProperty()
+  }, [params])
+
+  // Mostrar loading mientras se cargan los datos
+  if (loading || !property) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <div className="h-96 bg-gray-200 rounded-lg"></div>
+                <div className="bg-white rounded-lg p-6 space-y-4">
+                  <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <div className="h-96 bg-gray-200 rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   // Buscar el agente (placeholder - en producción vendría de la propiedad)
@@ -46,7 +94,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   }
 
   const formatPrice = (price: number) => {
-                       
     return `${property.currency} ${price.toLocaleString('es-AR')}`
   }
 
@@ -102,7 +149,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {formatPrice(property.price)}
+                      {formatPrice(property.price)}
                     </h1>
                     <div className="flex items-center text-gray-600 mb-2">
                       <MapPin size={16} className="mr-1" />
