@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ArrowRight, TrendingUp, Users, MapIcon, Home, Search } from "lucide-react"
+import { ArrowRight, TrendingUp, Users, MapIcon, Home, Search, Store, Car, Building, Warehouse } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,15 +16,60 @@ import { featuredProperties, stats } from "@/lib/data"
 import { formatPrice } from "@/lib/data"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import EnhancedSearchBar from '@/components/enhanced-search-bar'
+
+const operationImages = {
+  comprar: 'https://www.obtengavisa.com.ar/img/compra_propiedad2.jpg', // Casa moderna para comprar
+  alquilar: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop&crop=center', // Apartamento moderno para alquilar
+  explorar: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop&crop=center' // Vista urbana para explorar
+};
+
+// Primero, crea un objeto con las imágenes para cada ciudad
+const cityImages = {
+  'Vicente Lopez': 'https://resizer.glanacion.com/resizer/v2/el-cafe-paris-el-mas-antiguo-e-ilustre-del-barrio-56MNMZ4YHBA27PUZEXB2RIKCWU.jpg?auth=62dd999f866e434cebefbd09bacc54483827dfa8fc8903432e267a6af3b7a02f&width=1920&height=1280&quality=70&smart=true',
+  'Colegiales': 'https://upload.wikimedia.org/wikipedia/commons/6/65/Avenida_de_los_Incas_-_Corregidores_casa_esquina.jpg',
+  'Palermo': 'https://res.cloudinary.com/hello-tickets/image/upload/c_limit,f_auto,q_auto,w_768/v1684538142/post_images/Argentina-170/Buenos-aires/Palermo/41481138315_c682bb9482_o_Cropped.jpg',
+  'La Boca': 'https://buenosaires.gob.ar/sites/default/files/media/image/2018/08/23/0cb9ff5cc29168e9728208dfb7596bbd35f15ddc.jpg',
+  'Villa Urquiza': 'https://images.unsplash.com/photo-1580655653885-65763b2597d0?w=800&h=600&fit=crop&crop=center',
+  'Belgrano': 'https://resizer.glanacion.com/resizer/v2/la-zona-defiende-los-precios-mas-altos-de-la-KMDC3VUPRZAAHNRH4G5Y65D62E.JPG?auth=27d195247ca0b000b7fa34ef136a84af8bb3b113ecaab612162c36f74102ef1e&width=1280&height=854&quality=70&smart=true',
+  'San Fernando': 'https://infocielo.com/wp-content/uploads/2024/12/20200705120635_14-costanera-municipaljpeg.jpeg'
+};
+
+const propertyTypeImages = {
+  'Departamento Estándar': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop&crop=center',
+  'Casa': 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=center',
+  'Terrenos y Lotes': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&crop=center',
+  'Departamento Dúplex': 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop&crop=center',
+  'Local': 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop&crop=center',
+  'Departamento Monoambiente': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop&crop=center',
+  'Cochera': 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&h=600&fit=crop&crop=center',
+  'Oficina': 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop&crop=center',
+  'Casa Dúplex': 'https://images.unsplash.com/photo-1448630360428-65456885c650?w=800&h=600&fit=crop&crop=center',
+  'Depósito': 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&crop=center'
+};
+
+// También define iconos específicos para cada tipo
+const propertyTypeIcons = {
+  'Departamento Estándar': Home,
+  'Casa': Home,
+  'Terrenos y Lotes': MapIcon,
+  'Departamento Dúplex': Building,
+  'Local': Store,
+  'Departamento Monoambiente': Home,
+  'Cochera': Car,
+  'Oficina': Building,
+  'Casa Dúplex': Building,
+  'Depósito': Warehouse
+};
 
 // Componente de Select seguro para hidratación
-function SafeSelect({ 
-  value, 
-  onValueChange, 
-  placeholder, 
-  children, 
+function SafeSelect({
+  value,
+  onValueChange,
+  placeholder,
+  children,
   className = "",
-  defaultValue = "" 
+  defaultValue = ""
 }: {
   value: string
   onValueChange: (value: string) => void
@@ -34,7 +79,7 @@ function SafeSelect({
   defaultValue?: string
 }) {
   const [mounted, setMounted] = useState(false)
-  
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -44,19 +89,19 @@ function SafeSelect({
     return (
       <div className={`flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs ${className}`}>
         <span className="text-muted-foreground">{placeholder}</span>
-        <svg 
-          width="15" 
-          height="15" 
-          viewBox="0 0 15 15" 
-          fill="none" 
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4 opacity-50"
         >
-          <path 
-            d="m4.5 6 3 3 3-3" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round" 
+          <path
+            d="m4.5 6 3 3 3-3"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
@@ -78,7 +123,7 @@ function SafeSelect({
 
 export default function HomePage() {
   const router = useRouter()
-  
+
   // Inicializar estados con valores por defecto idénticos en server y client
   const [operationType, setOperationType] = useState("venta")
   const [propertyType, setPropertyType] = useState("cualquier-tipo")
@@ -95,23 +140,23 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (!mounted) return
-    
+
     const params = new URLSearchParams()
-    
+
     if (operationType && operationType !== "venta") {
       params.set("operacion", operationType)
     }
     if (propertyType && propertyType !== "cualquier-tipo") {
       params.set("tipo", propertyType.replace(" ", "-").toLowerCase())
     }
-    
+
     if (selectedLocation) {
       params.set("ubicacion", selectedLocation.address)
       params.set("lat", selectedLocation.lat.toString())
       params.set("lng", selectedLocation.lng.toString())
       params.set("radio", "10")
     }
-    
+
     const queryString = params.toString()
     router.push(`/propiedades${queryString ? `?${queryString}` : ''}`)
   }
@@ -128,7 +173,7 @@ export default function HomePage() {
     const params = new URLSearchParams()
     const formattedType = type.toLowerCase()
       .replace("departamento estándar", "departamento-estandar")
-      .replace("departamento dúplex", "departamento-duplex") 
+      .replace("departamento dúplex", "departamento-duplex")
       .replace("terrenos y lotes", "terrenos-lotes")
       .replace("departamento monoambiente", "departamento-monoambiente")
       .replace(" ", "-")
@@ -148,127 +193,84 @@ export default function HomePage() {
     router.push('/propiedades')
   }
 
+  const handleEnhancedSearch = (data: {
+    operation: string;
+    propertyType: string;
+    rooms: string;
+    selectedLocation: { address: string; lat: number; lng: number } | null;
+    priceRange: string;
+  }) => {
+    if (!mounted) return;
+  
+    console.log('Búsqueda avanzada:', data);
+  
+    const params = new URLSearchParams();
+  
+    // Mapear operación
+    if (data.operation) {
+      params.set("operacion", data.operation);
+    }
+  
+    // Mapear tipo de propiedad (mantener tu lógica existente)
+    if (data.propertyType) {
+      params.set("tipo", data.propertyType);
+    }
+  
+    // Mapear ambientes
+    if (data.rooms) {
+      params.set("ambientes", data.rooms);
+    }
+  
+    // Mapear ubicación (usar tu lógica existente de selectedLocation)
+    if (data.selectedLocation) {
+      params.set("ubicacion", data.selectedLocation.address.toLowerCase().replace(" ", "-"));
+      params.set("lat", data.selectedLocation.lat.toString());
+      params.set("lng", data.selectedLocation.lng.toString());
+    }
+  
+    // Mapear rango de precio
+    if (data.priceRange) {
+      params.set("precio", data.priceRange);
+    }
+  
+    // Navegar a propiedades con los filtros
+    router.push(`/propiedades?${params.toString()}`);
+  };
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[500px] flex items-center justify-center">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="https://d1acdg20u0pmxj.cloudfront.net/ar/assets/media/webp/home/bg-herobanner.webp"
-              alt="Propiedades en Buenos Aires"
-              fill
-              className="object-cover brightness-[0.7]"
-              priority
-            />
-          </div>
-          <div className="container mx-auto px-4 relative z-10 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Encuentra tu lugar ideal en Buenos Aires
-            </h1>
-            <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-              Las mejores propiedades en venta y alquiler con los agentes más calificados
-            </p>
-
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                {/* Select de Operación - CON HIDRATACIÓN SEGURA */}
-                <SafeSelect
-                  value={operationType}
-                  onValueChange={setOperationType}
-                  placeholder="Operación"
-                  className="w-full md:w-[180px]"
-                >
-                  <SelectItem value="venta">Venta</SelectItem>
-                  <SelectItem value="alquiler">Alquiler</SelectItem>
-                  <SelectItem value="alquiler-temporal">Alquiler Temporal</SelectItem>
-                </SafeSelect>
-
-                {/* Select de Tipo de Propiedad - CON HIDRATACIÓN SEGURA */}
-                <SafeSelect
-                  value={propertyType}
-                  onValueChange={setPropertyType}
-                  placeholder="Tipo"
-                  className="w-full md:w-[180px]"
-                >
-                  <SelectItem value="cualquier-tipo">Cualquier tipo</SelectItem>
-                  <SelectItem value="departamento-estandar">Departamento Estándar</SelectItem>
-                  <SelectItem value="casa">Casa</SelectItem>
-                  <SelectItem value="departamento-duplex">Departamento Dúplex</SelectItem>
-                  <SelectItem value="local">Local</SelectItem>
-                  <SelectItem value="terrenos-lotes">Terrenos y Lotes</SelectItem>
-                </SafeSelect>
-
-                <div className="flex-1">
-                  <SearchAutocomplete
-                    onLocationSelect={handleLocationSelect}
-                    placeholder="Buscar por ubicación, barrio o código"
-                    className="w-full"
-                  />
-                </div>
-
-                <Button 
-                  className="bg-red-600 hover:bg-red-700 w-full md:w-auto gap-2"
-                  onClick={handleSearch}
-                  disabled={!mounted}
-                >
-                  <Search size={18} />
-                  Buscar
-                </Button>
-              </div>
-              
-              {/* Mostrar ubicación seleccionada */}
-              {selectedLocation && mounted && (
-                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
-                  <span>📍 Buscarás cerca de: <strong>{selectedLocation.address}</strong></span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSelectedLocation(null)}
-                    className="text-green-600 hover:text-green-700 h-auto p-1"
-                  >
-                    ✕
-                  </Button>
-                </div>
-              )}
-
-              {/* Búsquedas rápidas */}
-              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-                <span className="text-sm text-gray-600 mr-2">Búsquedas populares:</span>
-                <button 
-                  onClick={() => handleOperationTypeSearch("venta")} 
-                  className="text-sm text-red-600 hover:underline"
-                  disabled={!mounted}
-                >
-                  Propiedades en venta
-                </button>
-                <span className="text-gray-300">•</span>
-                <button 
-                  onClick={() => handleCitySearch("Palermo")} 
-                  className="text-sm text-red-600 hover:underline"
-                  disabled={!mounted}
-                >
-                  Palermo
-                </button>
-                <span className="text-gray-300">•</span>
-                <button 
-                  onClick={() => handlePropertyTypeSearch("Casa")} 
-                  className="text-sm text-red-600 hover:underline"
-                  disabled={!mounted}
-                >
-                  Casas
-                </button>
-                <span className="text-gray-300">•</span>
-                <button 
-                  onClick={handleQuickSearch} 
-                  className="text-sm text-red-600 hover:underline"
-                  disabled={!mounted}
-                >
-                  Ver todas
-                </button>
-              </div>
+        {/* Hero Section Mejorado */}
+        <section 
+          className="relative min-h-[70vh] flex items-center justify-center bg-cover bg-center"
+          style={{
+            backgroundImage: 'url("https://d1acdg20u0pmxj.cloudfront.net/ar/assets/media/webp/home/bg-herobanner.webp")'
+          }}
+        >
+          {/* Overlay mejorado */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+          
+          {/* Contenido */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-12">
+            {/* Título y subtítulo */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
+                Encuentra tu lugar ideal en Buenos Aires
+              </h1>
+              <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg">
+                Las mejores propiedades en venta y alquiler con los agentes más calificados
+              </p>
             </div>
+
+            {/* Buscador mejorado */}
+            <EnhancedSearchBar 
+              onSearch={handleEnhancedSearch}
+              onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+              mounted={mounted}
+            />
           </div>
         </section>
 
@@ -349,35 +351,82 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">Encuentra lo que buscas</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <Button
+              <button
                 onClick={() => handleOperationTypeSearch("venta")}
-                className="h-32 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                className="group relative h-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
                 disabled={!mounted}
               >
-                <Home size={32} />
-                <span className="text-lg font-semibold">Comprar</span>
-                <span className="text-sm opacity-90">{Object.values(stats.operation_types).reduce((a, b) => a + b, 0)} propiedades</span>
-              </Button>
-              
-              <Button
+                {/* Imagen optimizada */}
+                <Image
+                  src={operationImages.comprar}
+                  alt="Comprar propiedades"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+
+                {/* Overlay con gradiente y color RE/MAX */}
+                <div className="absolute inset-0 bg-gradient-to-t from-red-600/70 via-red-500/50 to-red-400/30 group-hover:from-red-700/80 group-hover:via-red-600/60 group-hover:to-red-500/40 transition-all duration-300" />
+
+                {/* Contenido */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white z-10">
+                  <Home size={32} className="drop-shadow-lg" />
+                  <span className="text-lg font-semibold drop-shadow-lg">Comprar</span>
+                  <span className="text-sm opacity-90 drop-shadow-lg">
+                    {Object.values(stats.operation_types).reduce((a, b) => a + b, 0)} propiedades
+                  </span>
+                </div>
+              </button>
+
+              <button
                 onClick={() => handleOperationTypeSearch("alquiler")}
-                className="h-32 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                className="group relative h-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
                 disabled={!mounted}
               >
-                <MapIcon size={32} />
-                <span className="text-lg font-semibold">Alquilar</span>
-                <span className="text-sm opacity-90">Opciones disponibles</span>
-              </Button>
-              
-              <Button
+                {/* Imagen optimizada */}
+                <Image
+                  src={operationImages.alquilar}
+                  alt="Alquilar propiedades"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+
+                {/* Overlay con gradiente azul */}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-600/70 via-blue-500/50 to-blue-400/30 group-hover:from-blue-700/80 group-hover:via-blue-600/60 group-hover:to-blue-500/40 transition-all duration-300" />
+
+                {/* Contenido */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white z-10">
+                  <MapIcon size={32} className="drop-shadow-lg" />
+                  <span className="text-lg font-semibold drop-shadow-lg">Alquilar</span>
+                  <span className="text-sm opacity-90 drop-shadow-lg">Opciones disponibles</span>
+                </div>
+              </button>
+
+              <button
                 onClick={handleQuickSearch}
-                className="h-32 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white flex flex-col items-center justify-center gap-2 transition-all"
+                className="group relative h-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
                 disabled={!mounted}
               >
-                <Search size={32} />
-                <span className="text-lg font-semibold">Explorar</span>
-                <span className="text-sm opacity-90">Ver todas las opciones</span>
-              </Button>
+                {/* Imagen optimizada */}
+                <Image
+                  src={operationImages.explorar}
+                  alt="Explorar propiedades"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+
+                {/* Overlay con gradiente gris */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-600/70 via-gray-500/50 to-gray-400/30 group-hover:from-gray-700/80 group-hover:via-gray-600/60 group-hover:to-gray-500/40 transition-all duration-300" />
+
+                {/* Contenido */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white z-10">
+                  <Search size={32} className="drop-shadow-lg" />
+                  <span className="text-lg font-semibold drop-shadow-lg">Explorar</span>
+                  <span className="text-sm opacity-90 drop-shadow-lg">Ver todas las opciones</span>
+                </div>
+              </button>
             </div>
           </div>
         </section>
@@ -392,16 +441,31 @@ export default function HomePage() {
                 <button
                   key={city}
                   onClick={() => handleCitySearch(city)}
-                  className="group relative h-32 rounded-lg overflow-hidden shadow-md bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all cursor-pointer hover:shadow-lg transform hover:scale-105"
+                  className="group relative h-32 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
                   disabled={!mounted}
                 >
+                  {/* Imagen optimizada con Next.js */}
+                  <Image
+                    src={cityImages[city as keyof typeof cityImages] || cityImages['Vicente Lopez']}
+                    alt={`Vista de ${city}`}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+
+                  {/* Overlay para mejorar la legibilidad */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent group-hover:from-black/70 group-hover:via-black/40 transition-all duration-300" />
+
+                  {/* Contenido del texto */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <h3 className="font-bold text-sm mb-1">{city}</h3>
-                      <p className="text-xs opacity-90">Ver propiedades</p>
+                    <div className="text-center text-white z-10">
+                      <h3 className="font-bold text-sm mb-1 drop-shadow-lg">{city}</h3>
+                      <p className="text-xs opacity-90 drop-shadow-lg">Ver propiedades</p>
                     </div>
                   </div>
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+
+                  {/* Efecto hover con el color de RE/MAX */}
+                  <div className="absolute inset-0 bg-red-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                 </button>
               ))}
             </div>
@@ -409,6 +473,7 @@ export default function HomePage() {
         </section>
 
         {/* Property Types */}
+
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">Tipos de Propiedades</h2>
@@ -416,20 +481,50 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {Object.entries(stats.property_types)
                 .slice(0, 8)
-                .map(([type, count]) => (
-                  <button
-                    key={type}
-                    onClick={() => handlePropertyTypeSearch(type)}
-                    className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all text-center group cursor-pointer border border-gray-100 hover:border-red-200"
-                    disabled={!mounted}
-                  >
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200 transition-colors">
-                      <Home className="text-red-600" size={28} />
-                    </div>
-                    <h3 className="font-medium mb-2 group-hover:text-red-600 transition-colors">{type}</h3>
-                    <p className="text-gray-600 text-sm">{count} propiedades</p>
-                  </button>
-                ))}
+                .map(([type, count]) => {
+                  const IconComponent = propertyTypeIcons[type as keyof typeof propertyTypeIcons] || Home;
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => handlePropertyTypeSearch(type)}
+                      className="group relative h-40 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
+                      disabled={!mounted}
+                    >
+                      {/* Imagen optimizada */}
+                      <Image
+                        src={propertyTypeImages[type as keyof typeof propertyTypeImages] || propertyTypeImages['Casa']}
+                        alt={`${type} - RE/MAX SUMA`}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      />
+                      
+
+                      {/* Overlay con gradiente mejorado */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-red-900/60 group-hover:via-red-600/30 group-hover:to-transparent transition-all duration-300" />
+
+                      {/* Contenido */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white z-10 p-4">
+                        {/* Icono con fondo glassmorphism */}
+                        <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center group-hover:bg-red-600/80 group-hover:border-red-400/30 transition-all duration-300">
+                          <IconComponent size={24} className="text-white drop-shadow-lg" />
+                        </div>
+
+                        {/* Título */}
+                        <h3 className="font-semibold text-center text-sm leading-tight drop-shadow-lg">
+                          {type}
+                        </h3>
+
+                        {/* Contador con badge */}
+                        <div className="bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
+                          <p className="text-xs font-medium drop-shadow-lg">
+                            {count} propiedades
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </section>

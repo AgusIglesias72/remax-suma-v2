@@ -228,7 +228,7 @@ export function SearchAutocomplete({
     <GoogleAutocomplete
       onPlaceSelect={handlePlaceSelect}
       placeholder={placeholder}
-      icon="search"
+      icon="map"
       className={className}
     />
   )

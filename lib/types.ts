@@ -9,6 +9,8 @@ export interface AgentType {
 }
 
 export interface PropertyType {
+  tipo_operacion: string
+  parking: any
   id: string
   mls_id: string
   title: string

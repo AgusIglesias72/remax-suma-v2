@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppWrapper from "@/components/app-wrapper";
+import { GoogleMapsProvider } from "@/components/providers/google-maps-provider"; // ← NUEVO IMPORT
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,9 +44,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppWrapper>
-          {children}
-        </AppWrapper>
+        <GoogleMapsProvider> {/* ← WRAPPER AGREGADO */}
+          <AppWrapper>
+            {children}
+          </AppWrapper>
+        </GoogleMapsProvider>      {/* ← WRAPPER AGREGADO */}
       </body>
     </html>
   );
