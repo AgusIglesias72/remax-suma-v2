@@ -20,7 +20,7 @@ export interface PropertyType {
   operation_type: string
   property_type: string
   address: string
-  neighborhood?: string
+  neighborhood?: string | null
   city: string
   latitude: number
   longitude: number
@@ -28,10 +28,10 @@ export interface PropertyType {
   bedrooms: number
   bathrooms: number
   garages: number
-  covered_surface?: number
-  uncovered_surface?: number
-  semicovered_surface?: number
-  land_surface?: number
+  covered_surface?: number | null
+  uncovered_surface?: number | null
+  semicovered_surface?: number | null
+  land_surface?: number | null
   total_built_surface?: number
   price: number
   currency: string

@@ -18,7 +18,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.482961803675,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 70,
       "uncovered_surface": null,
@@ -42,7 +42,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/ebfb478b-32ff-468a-a10c-8cfb06aab5ed/860x440/addd141e-b577-41f4-9331-be4cab777ad4.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/ebfb478b-32ff-468a-a10c-8cfb06aab5ed/860x440/54f0313d-6b58-4101-9a6e-bd8e34c5c8c4.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/ebfb478b-32ff-468a-a10c-8cfb06aab5ed/860x440/ab8b5a38-76d2-465c-9359-b318b01c5667.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1723",
@@ -59,7 +62,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5359597,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 39,
       "uncovered_surface": 0,
@@ -83,7 +86,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b30b0693-ccd0-4fe4-ba49-3dd81bc3fbf1/860x440/7dee8485-b3e0-4d80-9c44-7d7fad3806b8.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b30b0693-ccd0-4fe4-ba49-3dd81bc3fbf1/860x440/d4f45aca-e32d-429d-9256-26b8b5745f8f.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b30b0693-ccd0-4fe4-ba49-3dd81bc3fbf1/860x440/ecbf35db-fce1-4730-9af6-81985312c111.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1724",
@@ -100,7 +106,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5345168,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 63,
       "uncovered_surface": 0,
@@ -124,7 +130,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/7e5fbc7c-3b2a-459e-8868-24b386218b31/860x440/b6b25d60-e23c-479f-82bf-0249148aa311.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/7e5fbc7c-3b2a-459e-8868-24b386218b31/860x440/74c53b1b-dbc6-4b34-afd8-3b00df832a5b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/7e5fbc7c-3b2a-459e-8868-24b386218b31/860x440/4a853b3f-17cf-4830-81bf-7e1038ea81c6.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1725",
@@ -141,7 +150,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4738609,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 83,
       "uncovered_surface": 10,
@@ -165,7 +174,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c2bf70ea-9f0c-4db5-8880-bd691005a5db/860x440/a0faa8c5-2b2a-44e2-bddc-246b8f83762b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c2bf70ea-9f0c-4db5-8880-bd691005a5db/860x440/4639eaab-03d5-4237-8f5a-bdb8d480602b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c2bf70ea-9f0c-4db5-8880-bd691005a5db/860x440/ef61336b-1d08-4c57-b385-72121cbad08f.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1727",
@@ -182,8 +194,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.793001681079,
       "rooms": 0,
       "bedrooms": 0,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": null,
       "uncovered_surface": null,
       "semicovered_surface": null,
@@ -205,7 +217,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/54fce55b-d3a4-49cf-88e3-8d3c687f57a5/860x440/3f8ba880-2c20-4a48-95da-a0ea6c7aaf75.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/54fce55b-d3a4-49cf-88e3-8d3c687f57a5/860x440/eccbc75b-493f-4098-af22-7765b4db2131.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/54fce55b-d3a4-49cf-88e3-8d3c687f57a5/860x440/a377af6a-9786-4b1e-80a3-7780d177e419.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1728",
@@ -222,7 +237,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.7652151,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 74,
       "uncovered_surface": 186,
@@ -246,7 +261,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/96b0eddb-1c6f-43be-abda-a1fb98c5a425/860x440/4447f8ac-304a-45a0-801d-8772269711ee.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/96b0eddb-1c6f-43be-abda-a1fb98c5a425/860x440/4e02a802-6778-4085-9c6f-b3755ede2ac1.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/96b0eddb-1c6f-43be-abda-a1fb98c5a425/860x440/797d4812-763f-4b24-b2f1-c4811ffb8f8f.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1730",
@@ -263,8 +281,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.3838754,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 87,
       "uncovered_surface": 0,
       "semicovered_surface": 0,
@@ -287,7 +305,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/16eb5487-916a-4888-ae8e-30bbc9db1ebc/860x440/9a5a613b-9aa9-48ed-ae8b-5752cca520b8.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/16eb5487-916a-4888-ae8e-30bbc9db1ebc/860x440/02089c8b-8d17-406f-b52d-288d8dd01589.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/16eb5487-916a-4888-ae8e-30bbc9db1ebc/860x440/0dcd6187-d077-44b9-a7bb-8a62196001f7.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1731",
@@ -304,7 +325,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5159289,
       "rooms": 5,
       "bedrooms": 4,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 2,
       "covered_surface": 197,
       "uncovered_surface": 235,
@@ -328,7 +349,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e8845bee-47c9-43b6-8f10-55d466709e37/860x440/e0dc8fc1-cef8-4929-a7be-a84eacdd6f93.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e8845bee-47c9-43b6-8f10-55d466709e37/860x440/bcb0dbce-576c-43f5-8473-d8ec787392a5.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e8845bee-47c9-43b6-8f10-55d466709e37/860x440/7abea110-5a0d-4705-a9e5-2c74ab0c2bce.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1732",
@@ -345,8 +369,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.456190228571,
       "rooms": 6,
       "bedrooms": 4,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 214,
       "uncovered_surface": 146,
       "semicovered_surface": 11,
@@ -369,7 +393,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e26c7cd-8292-441b-9d30-771b84c198c6/860x440/a0a7088d-c7f2-40bd-a235-948328bf6da9.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e26c7cd-8292-441b-9d30-771b84c198c6/860x440/d337dc7a-7914-45e3-ad97-0a816217e620.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e26c7cd-8292-441b-9d30-771b84c198c6/860x440/a86453d5-b617-4c02-b195-aa20ec023b5e.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1733",
@@ -386,7 +413,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4229249,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 106,
       "uncovered_surface": null,
@@ -410,7 +437,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/526a6350-a903-4aa6-897d-dc54d79da9f9/860x440/db99b39b-82eb-409b-aa3f-9a8c1413a69a.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/526a6350-a903-4aa6-897d-dc54d79da9f9/860x440/0da92a39-f9c6-4bc1-94fa-5180fe6e1945.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/526a6350-a903-4aa6-897d-dc54d79da9f9/860x440/83948166-377f-4864-a242-b1df960f2447.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1734",
@@ -427,7 +457,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.56395661991,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 38,
       "uncovered_surface": null,
@@ -451,7 +481,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2e503ce5-dd57-4349-8079-388ff9cd4b61/860x440/9d6e6a10-ac5f-4fa8-84d5-b7382153d72e.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2e503ce5-dd57-4349-8079-388ff9cd4b61/860x440/bfb7964c-f4ba-4110-a171-1ec85d5859c5.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2e503ce5-dd57-4349-8079-388ff9cd4b61/860x440/ee13143d-8a48-492d-98fe-a5fa4257059d.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1735",
@@ -468,7 +501,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4028992,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 63,
       "uncovered_surface": 24,
@@ -492,7 +525,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/cd5e8168-d1d3-41d1-a069-35ac6a69cd33/860x440/c3831012-d173-4887-bbf9-cfed50c6df4d.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/cd5e8168-d1d3-41d1-a069-35ac6a69cd33/860x440/4c2d612e-b1d3-4835-b41b-21e070ea2951.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/cd5e8168-d1d3-41d1-a069-35ac6a69cd33/860x440/ef3ff4b3-afe4-42bc-8bd1-ac843139e7d6.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1737",
@@ -509,7 +545,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4403295,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 95,
       "uncovered_surface": 22,
@@ -533,7 +569,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53a594e0-8cb8-4a2d-a166-05df35ffc525/860x440/03ded85b-f47b-46e0-b907-1136e8cf466a.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53a594e0-8cb8-4a2d-a166-05df35ffc525/860x440/2f7abccf-6532-4993-8530-f50b4bbc71bf.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53a594e0-8cb8-4a2d-a166-05df35ffc525/860x440/41b49c33-cdbf-4d2c-b769-8413a1cfe50e.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1738",
@@ -550,7 +589,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4534851,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 105,
       "uncovered_surface": null,
@@ -574,7 +613,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c7d1d622-0c4d-4155-a153-d960516a24f1/860x440/f1714c2f-bbc0-4d31-a12c-5b5fec1146ee.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c7d1d622-0c4d-4155-a153-d960516a24f1/860x440/c5edd6a2-6f6b-4d75-8240-5bd77125bd53.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c7d1d622-0c4d-4155-a153-d960516a24f1/860x440/1459771f-3c6c-406b-8d17-041fe69e378b.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1740",
@@ -591,7 +633,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4939707,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 2,
       "covered_surface": 147,
       "uncovered_surface": 63,
@@ -615,7 +657,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e2fa0ed4-5d95-4fe0-ac40-57fd9b445a5c/860x440/bec1f24b-8391-4148-9f0b-cb9dde59a2c3.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e2fa0ed4-5d95-4fe0-ac40-57fd9b445a5c/860x440/72e5b4eb-f385-43ea-b33c-c9611d2a3523.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e2fa0ed4-5d95-4fe0-ac40-57fd9b445a5c/860x440/c90acd92-7522-493d-a2b0-49422ed35383.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1741",
@@ -632,7 +677,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4877482,
       "rooms": 6,
       "bedrooms": 5,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 141,
       "uncovered_surface": 74,
@@ -656,7 +701,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/6e403d9c-15f8-4fc1-b94d-168ff71c4641/860x440/4f7d7584-0723-4b65-adc1-0fd85982b450.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/6e403d9c-15f8-4fc1-b94d-168ff71c4641/860x440/89c9b6e3-9df0-4e53-ae42-d56d4148fedb.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/6e403d9c-15f8-4fc1-b94d-168ff71c4641/860x440/ea1fc735-eeb1-4186-90c9-6911ccda6938.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1743",
@@ -673,8 +721,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.9086745,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 30,
       "uncovered_surface": 0,
       "semicovered_surface": 0,
@@ -697,7 +745,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d86920d4-6c63-40d9-ba75-5877488e884b/860x440/a55205e4-c377-4b7b-bc68-56a422d73216.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d86920d4-6c63-40d9-ba75-5877488e884b/860x440/e1bb8dc1-1140-4cc1-a171-9efb23f00c0f.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d86920d4-6c63-40d9-ba75-5877488e884b/860x440/408c448d-09d7-4492-ac57-2a9eaa373dd6.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1744",
@@ -714,7 +765,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4447217,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 41,
       "uncovered_surface": null,
@@ -738,7 +789,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e0d5a12a-48c8-4dcf-83bc-0b8bb5e167b2/860x440/0152e40e-6673-4634-a096-f6af3658560b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e0d5a12a-48c8-4dcf-83bc-0b8bb5e167b2/860x440/a47f7260-3e18-425a-b24c-a28170c61b70.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e0d5a12a-48c8-4dcf-83bc-0b8bb5e167b2/860x440/7d1bb278-be2c-4fd8-9fdc-2a8457661744.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1745",
@@ -755,7 +809,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4298391,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 96,
       "uncovered_surface": null,
@@ -779,7 +833,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d456bee2-5ae0-44b8-bad6-224f062713d8/860x440/26ec323f-3d3e-49e7-b327-3bf585a75068.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d456bee2-5ae0-44b8-bad6-224f062713d8/860x440/005f0c9b-d9f3-4f14-97d3-c6b5c2927420.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/d456bee2-5ae0-44b8-bad6-224f062713d8/860x440/09e1733a-367b-40f8-b116-3ce1365a3df8.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1746",
@@ -796,7 +853,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4615006,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 33,
       "uncovered_surface": 0,
@@ -820,7 +877,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/5852587e-439a-464a-9aea-7dccd55b8c30/860x440/7480eeb1-64ea-417f-8e28-e5034014886c.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/5852587e-439a-464a-9aea-7dccd55b8c30/860x440/88deaae7-85d8-403a-9749-6f2b75f89694.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/5852587e-439a-464a-9aea-7dccd55b8c30/860x440/9cfe63f3-4cc2-44fe-b81f-38cdc4d57381.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1747",
@@ -837,7 +897,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5234114,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 38,
       "uncovered_surface": null,
@@ -861,7 +921,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91a2ea22-771b-412f-8205-0b49d8a5f5c1/860x440/f6fc5358-7c23-4455-ae09-7644d77a5168.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91a2ea22-771b-412f-8205-0b49d8a5f5c1/860x440/563a0cf4-5879-408d-bb65-fcc21ec18d7d.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91a2ea22-771b-412f-8205-0b49d8a5f5c1/860x440/7fafd250-d99a-4541-9e23-744a58536f12.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1749",
@@ -878,7 +941,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.6647149,
       "rooms": 1,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 31,
       "uncovered_surface": 0,
@@ -902,7 +965,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/244c4e0f-e744-4a27-befd-5266ed0c76f9/860x440/49dfdff0-a25a-4b8d-84b7-ab9cf2dbab6c.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/244c4e0f-e744-4a27-befd-5266ed0c76f9/860x440/4851db3b-c9cb-4585-ac18-92f2f938af34.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/244c4e0f-e744-4a27-befd-5266ed0c76f9/860x440/fc6af86e-6232-4185-95aa-a3bc3308495d.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1750",
@@ -919,7 +985,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4317854,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 70,
       "uncovered_surface": 27,
@@ -943,7 +1009,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2a4bd19d-79d5-4fe4-b3a4-2096daa1b125/860x440/e7a602a9-506c-4ca2-bedb-549da547c1c4.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2a4bd19d-79d5-4fe4-b3a4-2096daa1b125/860x440/64a24f7c-0041-4e22-a953-812503edccc7.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2a4bd19d-79d5-4fe4-b3a4-2096daa1b125/860x440/b6ca8724-5a20-451c-938f-4093b92d27aa.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1754",
@@ -960,7 +1029,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.432352542877,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 50,
       "uncovered_surface": 0,
@@ -984,7 +1053,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/1c51f938-40a6-4088-ad9a-00e37337561f/860x440/5de4133e-8457-4cf5-b54d-e061705eacd4.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/1c51f938-40a6-4088-ad9a-00e37337561f/860x440/5806a3a0-c3bf-40c4-80b1-0b087df87add.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/1c51f938-40a6-4088-ad9a-00e37337561f/860x440/fa2b1825-669c-45bf-afcb-695ab9741f60.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1755",
@@ -1001,7 +1073,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5131638,
       "rooms": 5,
       "bedrooms": 4,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 3,
       "covered_surface": 229,
       "uncovered_surface": null,
@@ -1025,7 +1097,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f64fc348-f4f2-462e-8dda-06ee765bdac1/860x440/fa9af9e6-9395-4b79-b0f8-955a85e441dd.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f64fc348-f4f2-462e-8dda-06ee765bdac1/860x440/48b86436-b58e-4de7-bb21-2d20a3600dd9.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f64fc348-f4f2-462e-8dda-06ee765bdac1/860x440/e53f8f60-f708-4dbb-b46f-5ad148470096.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1757",
@@ -1042,8 +1117,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5108295,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 89,
       "uncovered_surface": 63,
       "semicovered_surface": 0,
@@ -1066,7 +1141,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c200a8a9-104c-4712-9566-f82816963498/860x440/96b0d4cf-0db6-461f-a3c6-b367e9fd7809.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c200a8a9-104c-4712-9566-f82816963498/860x440/b0f28268-e7f3-4dc9-ab60-00be26e6d828.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/c200a8a9-104c-4712-9566-f82816963498/860x440/ad8a5562-afe2-40f3-8e10-1da67a194279.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1758",
@@ -1083,7 +1161,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4744193,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 48,
       "uncovered_surface": 0,
@@ -1107,7 +1185,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/9ded6512-7ca3-4564-9991-02be8fb2f9dc/860x440/f2b6bc46-f4a3-4c69-836c-f220c2a88dcc.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/9ded6512-7ca3-4564-9991-02be8fb2f9dc/860x440/11b62da9-3271-4bcf-a36c-5c928a4178a5.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/9ded6512-7ca3-4564-9991-02be8fb2f9dc/860x440/254ed5e1-2923-419c-a737-3cb0d88ba88f.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1761",
@@ -1124,7 +1205,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4723315,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 63,
       "uncovered_surface": null,
@@ -1148,7 +1229,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3c8d28f3-dc9c-4572-8273-c134ddd40cf7/860x440/e1c6d478-2031-46a8-9732-12cee47ef5d2.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3c8d28f3-dc9c-4572-8273-c134ddd40cf7/860x440/00b005ae-f662-4878-b8b0-03fdff576004.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3c8d28f3-dc9c-4572-8273-c134ddd40cf7/860x440/103d5f55-1cad-40bd-8d9b-9e6d083c92d7.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1762",
@@ -1165,7 +1249,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4816803,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 56,
       "uncovered_surface": null,
@@ -1189,7 +1273,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2b96e4ac-a7d1-4302-9bfb-86eff1dc3435/860x440/c6d88a9e-94c8-4896-b2dc-0c677776e50b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2b96e4ac-a7d1-4302-9bfb-86eff1dc3435/860x440/85236c11-35a5-4b51-a85f-eaca76382ef5.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2b96e4ac-a7d1-4302-9bfb-86eff1dc3435/860x440/b46604fb-c7e6-4245-ad16-fb7893be3e3a.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1764",
@@ -1206,7 +1293,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4262754,
       "rooms": 1,
       "bedrooms": 0,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 29,
       "uncovered_surface": null,
@@ -1230,7 +1317,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/827a4dc0-b15a-45a2-a504-60dee03bc823/860x440/03e78bf4-492d-4d25-8924-411f6e3b48d3.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/827a4dc0-b15a-45a2-a504-60dee03bc823/860x440/38ffb038-8f29-46a7-9c7f-13dea37ed3e8.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/827a4dc0-b15a-45a2-a504-60dee03bc823/860x440/8c6de516-52e2-42ca-9fe9-aea7837afe24.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1766",
@@ -1247,7 +1337,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5053511,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 58,
       "uncovered_surface": 64,
@@ -1271,7 +1361,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/502bccdf-7299-4fc1-953a-59db89cc763c/860x440/0edd0425-8f34-4334-9a59-8beebeac03b7.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/502bccdf-7299-4fc1-953a-59db89cc763c/860x440/04c54774-a478-4578-90fd-e4d088016736.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/502bccdf-7299-4fc1-953a-59db89cc763c/860x440/37f2d07d-1215-4e20-b26e-7e0eb3ec2371.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1767",
@@ -1288,7 +1381,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4598157,
       "rooms": 1,
       "bedrooms": 0,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 34,
       "uncovered_surface": 0,
@@ -1312,7 +1405,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/0ec63ebd-91d6-4516-8587-881840e82fbe/860x440/00596970-2495-46cb-9a5e-1790f84317f7.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/0ec63ebd-91d6-4516-8587-881840e82fbe/860x440/69d6852e-2404-48b0-a93d-4042d12871fd.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/0ec63ebd-91d6-4516-8587-881840e82fbe/860x440/5f481eb6-8607-48cb-9fc9-5836043a2fde.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1768",
@@ -1329,7 +1425,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.43960952654,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 48,
       "uncovered_surface": 1,
@@ -1353,7 +1449,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f94746bb-74ac-4c32-a1a3-83c0ee849d00/860x440/daebaf06-8b41-4769-830c-b51c12c22c66.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f94746bb-74ac-4c32-a1a3-83c0ee849d00/860x440/4716dcc7-9df1-4884-b3b1-f0dab30e6e50.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f94746bb-74ac-4c32-a1a3-83c0ee849d00/860x440/139b4846-0723-43bd-a97a-d48ef43e5afa.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1769",
@@ -1370,7 +1469,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.491251170635,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 120,
       "uncovered_surface": 85,
@@ -1394,7 +1493,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2329a47a-f85f-4a55-9af3-bf5b8b4cae68/860x440/ae4bc4c5-9826-4d6e-b0b6-4bb88c0e3353.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2329a47a-f85f-4a55-9af3-bf5b8b4cae68/860x440/acfee24c-1b18-4cef-9cb6-5b7fa4d2343a.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2329a47a-f85f-4a55-9af3-bf5b8b4cae68/860x440/88443f90-0ec6-4f72-87e2-e302e67b8893.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1771",
@@ -1411,7 +1513,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4359079,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 48,
       "uncovered_surface": 0,
@@ -1435,7 +1537,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/94c3f7d6-9c71-44e9-af43-42b2f0d82fb3/860x440/3a7c59de-bed3-4195-aef7-ded6e87cb888.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/94c3f7d6-9c71-44e9-af43-42b2f0d82fb3/860x440/1d248a28-01ba-442d-b2d2-6169a446f550.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/94c3f7d6-9c71-44e9-af43-42b2f0d82fb3/860x440/9b96c985-138c-45e7-b172-e9e6b3835726.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1772",
@@ -1452,7 +1557,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.462655,
       "rooms": 5,
       "bedrooms": 4,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 137,
       "uncovered_surface": 3,
@@ -1476,7 +1581,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b2f5c990-428d-4a02-a09a-55f030371be0/860x440/4d331f79-0c93-402b-a092-6cf62c5adc1d.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b2f5c990-428d-4a02-a09a-55f030371be0/860x440/7f9b311f-a6ab-4e0c-b893-232d3cd1c2e1.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/b2f5c990-428d-4a02-a09a-55f030371be0/860x440/45688b50-dbad-4e63-b2d6-1451e39e7805.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1773",
@@ -1493,7 +1601,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4074271,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 62,
       "uncovered_surface": null,
@@ -1517,7 +1625,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/937333da-5a21-4e76-aeb5-fba28cce800d/860x440/42d45320-f4af-4c45-8904-e383fb35626e.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/937333da-5a21-4e76-aeb5-fba28cce800d/860x440/3b24437c-cb26-4e2c-8c03-21b0a646045e.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/937333da-5a21-4e76-aeb5-fba28cce800d/860x440/1b5a5e29-0cd7-4017-bdcb-902487c4f0a6.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1777",
@@ -1534,7 +1645,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4509034,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 55,
       "uncovered_surface": 57,
@@ -1558,7 +1669,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2ff7b0b1-a37c-4070-ade2-e92df2690d2b/860x440/40b1a612-f6f0-4722-8838-319f950dcc96.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2ff7b0b1-a37c-4070-ade2-e92df2690d2b/860x440/af184829-4ebc-4ef4-a6e6-cffde21a7f62.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2ff7b0b1-a37c-4070-ade2-e92df2690d2b/860x440/f0477b22-19f7-4094-bf98-e74fac9b7a3f.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1778",
@@ -1575,8 +1689,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4784555,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 60,
       "uncovered_surface": 0,
       "semicovered_surface": 0,
@@ -1599,7 +1713,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f9d61261-9b78-455b-bbf9-888ea74f6067/860x440/24eab22f-a110-4cc4-b4aa-560dba91f669.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f9d61261-9b78-455b-bbf9-888ea74f6067/860x440/38b5e5b2-8a77-43f3-911c-8b1d1d8055c3.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/f9d61261-9b78-455b-bbf9-888ea74f6067/860x440/af52a3b1-6179-452c-95f3-4dd7df22313e.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1779",
@@ -1616,7 +1733,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5308918,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 97,
       "uncovered_surface": 48,
@@ -1640,7 +1757,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/aa3a7d6a-a209-4dd9-af1e-7367f77e3fca/860x440/6b331d15-cccd-4ae1-b338-0fd8ac63ee1f.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/aa3a7d6a-a209-4dd9-af1e-7367f77e3fca/860x440/a9da267d-e667-407f-87d9-8ab539eccf86.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/aa3a7d6a-a209-4dd9-af1e-7367f77e3fca/860x440/6cc4dfc2-7611-4669-a541-8da98c413cc6.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1780",
@@ -1657,7 +1777,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.47535780922,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 103,
       "uncovered_surface": null,
@@ -1681,7 +1801,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53f00813-47a8-466d-b287-d6fd10dc9414/860x440/028a7b6e-dd00-4492-af79-bff02fa39848.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53f00813-47a8-466d-b287-d6fd10dc9414/860x440/201958c4-9520-480d-b15a-a139a9e1416f.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/53f00813-47a8-466d-b287-d6fd10dc9414/860x440/6f46de6b-cb7d-4053-943d-83ce489947ec.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1781",
@@ -1698,7 +1821,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.467092514038,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 89,
       "uncovered_surface": 0,
@@ -1722,7 +1845,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/63bc2e10-dcd5-42b8-9a54-0044693e7108/860x440/91b7b02b-8722-411f-b20d-bf6285f0eef4.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/63bc2e10-dcd5-42b8-9a54-0044693e7108/860x440/b3b95391-1db5-46b1-842e-0d54fdd2c9c2.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/63bc2e10-dcd5-42b8-9a54-0044693e7108/860x440/949e769a-1dbc-49bb-aa33-bd41f52a79b2.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1786",
@@ -1739,7 +1865,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.460168594785,
       "rooms": 3,
       "bedrooms": 2,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 95,
       "uncovered_surface": 9,
@@ -1763,7 +1889,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e45c4f84-319c-49e7-b566-e3c4dba13578/860x440/5b2e4743-9533-413b-8945-09ec969bcb34.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e45c4f84-319c-49e7-b566-e3c4dba13578/860x440/8e07a55f-ed1c-43ad-b063-24dcb2387797.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/e45c4f84-319c-49e7-b566-e3c4dba13578/860x440/6a55e56d-22eb-4681-aac1-297b7aaf2389.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1787",
@@ -1780,8 +1909,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4530909,
       "rooms": 0,
       "bedrooms": 0,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 12,
       "uncovered_surface": 0,
       "semicovered_surface": null,
@@ -1804,7 +1933,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e30385e-3eba-4f63-aacf-10d49547b78e/860x440/01a35b96-22bf-4714-8c6f-6233a13490f8.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e30385e-3eba-4f63-aacf-10d49547b78e/860x440/5f21ee09-b5d7-442e-885e-b1578342478c.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/3e30385e-3eba-4f63-aacf-10d49547b78e/860x440/1068481e-1d13-442c-a84e-92ebb7442e20.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1788",
@@ -1821,7 +1953,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4771341,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 39,
       "uncovered_surface": 3,
@@ -1845,7 +1977,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/4380d021-7286-43e5-91d2-414fee04e082/860x440/2ad87ba3-6712-4637-848e-bfe9a3635fd1.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/4380d021-7286-43e5-91d2-414fee04e082/860x440/96159a4b-1a92-4217-b7f0-1daeb1e65036.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/4380d021-7286-43e5-91d2-414fee04e082/860x440/c1c3a046-52ad-434d-a333-402b3ddb21be.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1789",
@@ -1862,7 +1997,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5824133,
       "rooms": 6,
       "bedrooms": 4,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 2,
       "covered_surface": 250,
       "uncovered_surface": 71,
@@ -1886,7 +2021,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/8566eb27-571f-453e-aa85-2f42ff61fab8/860x440/b690e866-5d35-40da-86a5-c0b8b4abd010.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/8566eb27-571f-453e-aa85-2f42ff61fab8/860x440/f0165023-e305-430c-99d7-f3e5ff79d5c7.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/8566eb27-571f-453e-aa85-2f42ff61fab8/860x440/b9451a4b-e09c-4fee-b6e6-e86a82a1e030.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1790",
@@ -1903,7 +2041,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4669634,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 48,
       "uncovered_surface": 0,
@@ -1927,7 +2065,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/af4cac01-c4fb-4b41-8104-dcee672eb85f/860x440/e2728840-6fe1-49ce-b4f4-7f8076a2d8b2.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/af4cac01-c4fb-4b41-8104-dcee672eb85f/860x440/9e050366-b96a-4e35-81dd-aeaf467702a6.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/af4cac01-c4fb-4b41-8104-dcee672eb85f/860x440/d706ad93-ea27-4692-8a83-1be1f09ba620.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1792",
@@ -1944,7 +2085,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.46953868866,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 48,
       "uncovered_surface": null,
@@ -1968,7 +2109,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/83e60c1c-e403-43bd-9e8d-54409e99232a/860x440/21f5c368-f547-4d57-9510-5877e7d8203a.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/83e60c1c-e403-43bd-9e8d-54409e99232a/860x440/75280c5e-f9a0-4439-ad1c-e9d45143fd97.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/83e60c1c-e403-43bd-9e8d-54409e99232a/860x440/316935f9-813b-4fbe-ad01-39885a1f4312.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1793",
@@ -1985,7 +2129,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5485063,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 1,
       "covered_surface": 100,
       "uncovered_surface": 123,
@@ -2009,7 +2153,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/dd3d4282-e107-4d38-8de0-95a2a0f8dd7d/860x440/8d115b5c-4736-4620-91c3-85888789b91b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/dd3d4282-e107-4d38-8de0-95a2a0f8dd7d/860x440/f6a3b271-f9b5-4aec-9fd0-8eea48a10089.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/dd3d4282-e107-4d38-8de0-95a2a0f8dd7d/860x440/93dbb498-2d4c-4dcd-86f1-630063eaac4a.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1794",
@@ -2026,7 +2173,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.4194935,
       "rooms": 4,
       "bedrooms": 3,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 73,
       "uncovered_surface": 28,
@@ -2050,7 +2197,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/49e194a9-5a33-4999-979d-68e3acae9d2f/860x440/3e4e2ba1-b35c-49c9-ae92-1042ba6f3d6d.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/49e194a9-5a33-4999-979d-68e3acae9d2f/860x440/2850f463-ac5d-4ca1-b403-06cd5383b27b.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/49e194a9-5a33-4999-979d-68e3acae9d2f/860x440/799e2cac-ec13-4b95-9fd6-ee9ff0f7ef9c.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1795",
@@ -2067,7 +2217,7 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.5251806,
       "rooms": 2,
       "bedrooms": 1,
-      "bathrooms": null,
+      "bathrooms": 1,
       "garages": 0,
       "covered_surface": 65,
       "uncovered_surface": 21,
@@ -2091,7 +2241,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2fe22c90-86ef-47ab-bcf2-44b698972144/860x440/b04d1cc2-0bb7-4426-a275-8d916997238c.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2fe22c90-86ef-47ab-bcf2-44b698972144/860x440/75ff3991-b0e7-4647-944d-19276fbbedb8.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/2fe22c90-86ef-47ab-bcf2-44b698972144/860x440/841908d4-d790-42de-93ad-e5c244330386.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     },
     {
       "id": "1797",
@@ -2108,8 +2261,8 @@ export const mockDatabase: DatabaseType = {
       "longitude": -58.3666022,
       "rooms": 1,
       "bedrooms": 1,
-      "bathrooms": null,
-      "garages": null,
+      "bathrooms": 1,
+      "garages": 0,
       "covered_surface": 31,
       "uncovered_surface": 0,
       "semicovered_surface": 2,
@@ -2132,7 +2285,10 @@ export const mockDatabase: DatabaseType = {
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91d815ea-a525-47de-8421-b99ed602a3f2/860x440/7aadebdf-31b6-42c2-a457-fe955a64d80e.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91d815ea-a525-47de-8421-b99ed602a3f2/860x440/f0f43c4a-43a9-46e7-9e76-40b191b1408a.jpg",
         "https://d1acdg20u0pmxj.cloudfront.net/listings/91d815ea-a525-47de-8421-b99ed602a3f2/860x440/93486e7b-265e-4276-a381-fd4a015641f4.jpg"
-      ]
+      ],
+      features: [],
+      tipo_operacion: "",
+      parking: undefined
     }
   ],
   agents: [
