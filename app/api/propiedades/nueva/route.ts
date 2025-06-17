@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chromium } from "playwright";
 
+const {REMAX_URL, REMAX_PASSWORD, REMAX_EMAIL} = process.env
+
 // Interfaces para tipar los datos
 interface NewPropertyData {
   // Información básica
@@ -139,7 +141,10 @@ async function loginToRedRemax() {
 
   try {
     console.log("🌐 Navegando a RedRemax...");
-    await page.goto("https://www.redremax.com/", {
+    if (!REMAX_URL) {
+      throw new Error("REMAX_URL no está definida");
+    }
+    await page.goto(REMAX_URL, {
       waitUntil: "networkidle",
       timeout: 30000,
     });
@@ -202,11 +207,20 @@ async function loginToRedRemax() {
 
     // Completar credenciales
     console.log("📝 Completando credenciales...");
-    await userField.fill("miltonev@remax.com.ar");
-    console.log("✅ Usuario completado: miltonev@remax.com.ar");
+    
+    if (!REMAX_EMAIL) {
+      throw new Error("REMAX_EMAIL no está definido en las variables de entorno");
+    }
+    
+    await userField.fill(REMAX_EMAIL);
+    console.log(`✅ Usuario completado: ${REMAX_EMAIL}`);
 
-    await passwordField.fill("Milton2024");
-    console.log("✅ Contraseña completada: Milton2024");
+    if (!REMAX_PASSWORD) {
+      throw new Error("REMAX_PASSWORD no está definido en las variables de entorno");
+    }
+
+    await passwordField.fill(REMAX_PASSWORD);
+    console.log("✅ Contraseña completada");
 
     // Hacer click en login
     console.log("🔑 Haciendo click en login...");
@@ -226,7 +240,7 @@ async function loginToRedRemax() {
     // Verificar si seguimos en la página de login (indicaría error)
     if (
       currentUrl.includes("login") ||
-      currentUrl === "https://www.redremax.com/"
+      currentUrl === REMAX_URL
     ) {
       console.log("⚠️ Posible error de login - seguimos en página de login");
 
