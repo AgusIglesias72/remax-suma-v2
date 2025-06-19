@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chromium } from "playwright";
 
-const {REMAX_URL, REMAX_PASSWORD, REMAX_EMAIL} = process.env
+const { REMAX_URL, REDREMAX_PASSWORD, REDREMAX_USERNAME } = process.env;
 
 // Interfaces para tipar los datos
 interface NewPropertyData {
@@ -207,19 +207,23 @@ async function loginToRedRemax() {
 
     // Completar credenciales
     console.log("📝 Completando credenciales...");
-    
-    if (!REMAX_EMAIL) {
-      throw new Error("REMAX_EMAIL no está definido en las variables de entorno");
-    }
-    
-    await userField.fill(REMAX_EMAIL);
-    console.log(`✅ Usuario completado: ${REMAX_EMAIL}`);
 
-    if (!REMAX_PASSWORD) {
-      throw new Error("REMAX_PASSWORD no está definido en las variables de entorno");
+    if (!REDREMAX_USERNAME) {
+      throw new Error(
+        "REDREMAX_USERNAME no está definido en las variables de entorno"
+      );
     }
 
-    await passwordField.fill(REMAX_PASSWORD);
+    await userField.fill(REDREMAX_USERNAME);
+    console.log(`✅ Usuario completado: ${REDREMAX_USERNAME}`);
+
+    if (!REDREMAX_PASSWORD) {
+      throw new Error(
+        "REDREMAX_PASSWORD no está definido en las variables de entorno"
+      );
+    }
+
+    await passwordField.fill(REDREMAX_PASSWORD);
     console.log("✅ Contraseña completada");
 
     // Hacer click en login
@@ -238,10 +242,7 @@ async function loginToRedRemax() {
     await page.screenshot({ path: "login-result.png", fullPage: true });
 
     // Verificar si seguimos en la página de login (indicaría error)
-    if (
-      currentUrl.includes("login") ||
-      currentUrl === REMAX_URL
-    ) {
+    if (currentUrl.includes("login") || currentUrl === REMAX_URL) {
       console.log("⚠️ Posible error de login - seguimos en página de login");
 
       // Buscar mensajes de error en la página
@@ -626,6 +627,10 @@ async function fillPropertyForm(page: any, formattedData: any) {
         path: "location-fields-expanded.png",
         fullPage: true,
       });
+
+      console.log("🗺️ COMPLETANDO CAMPOS DE UBICACIÓN...");
+      await fillLocationFields(page, formattedData);
+      console.log("✅ Campos de ubicación completados");
     } catch (e) {
       console.log(
         `❌ Error desplegando opciones de ubicación: ${(e as Error).message}`
@@ -693,6 +698,12 @@ async function fillPropertyForm(page: any, formattedData: any) {
         "expensas",
         "avanzar-ubicacion",
         "desplegar-ubicacion",
+        "calle", // ← NUEVO
+        "numero", // ← NUEVO
+        "codigoPostal", // ← NUEVO
+        "pais", // ← NUEVO
+        "provincia", // ← NUEVO
+        "partido", // ← NUEVO
         "titulo",
         "descripcion",
       ],
@@ -849,3 +860,590 @@ export async function GET() {
     ],
   });
 }
+
+// ============================================
+// 🗺️ FUNCIÓN PARA AGREGAR A TU CÓDIGO EXISTENTE
+// ============================================
+
+// 1. FUNCIÓN PARA COMPLETAR LOS CAMPOS DE UBICACIÓN
+
+async function fillLocationFields(page: any, formattedData: any) {
+  console.log("🗺️ Completando campos de ubicación...");
+
+  try {
+    // Parsear la dirección para extraer los datos
+    //const locationData = parseAddressData(formattedData.direccion);
+    const locationData = await parseAddressDataWithGoogleMaps(formattedData.direccion);
+    console.log("📍 Datos de ubicación parseados:", locationData);
+
+    // XPaths de los campos de ubicación
+    const locationXPaths = {
+      calle:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[1]/mat-form-field/div/div[1]/div/input",
+      numero:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[2]/div[1]/mat-form-field/div/div[1]/div/input",
+      codigoPostal:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[2]/div[2]/mat-form-field/div/div[1]/div/input",
+      paisDropdown:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[4]/div[1]/app-select-list-v2-input/mat-form-field/div/div[1]/div/mat-select/div/div[1]/span",
+      provinciaDropdown:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[4]/div[2]/app-select-list-v2-input/mat-form-field/div/div[1]/div/mat-select/div/div[1]/span",
+      partidoDropdown:
+        "/html/body/app-root/app-private-layout/div[1]/app-properties-form-page/div/div[2]/div[1]/app-prop-step2/div[1]/div/form/div[3]/div/div[1]/div[5]/div[1]/app-select-list-v2-input/mat-form-field/div/div[1]/div",
+    };
+
+    // CAMPO 1: Completar Calle
+    console.log("🛣️ Completando calle...");
+    const calleField = await page.waitForSelector(
+      `xpath=${locationXPaths.calle}`,
+      { timeout: 10000 }
+    );
+    await calleField.fill(locationData.calle);
+    console.log(`✅ Calle completada: ${locationData.calle}`);
+
+    // CAMPO 2: Completar Número
+    console.log("🔢 Completando número...");
+    const numeroField = await page.waitForSelector(
+      `xpath=${locationXPaths.numero}`,
+      { timeout: 5000 }
+    );
+    await numeroField.fill(locationData.numero);
+    console.log(`✅ Número completado: ${locationData.numero}`);
+
+    // CAMPO 3: Completar Código Postal
+    console.log("📮 Completando código postal...");
+    const codigoPostalField = await page.waitForSelector(
+      `xpath=${locationXPaths.codigoPostal}`,
+      { timeout: 5000 }
+    );
+    await codigoPostalField.fill(locationData.codigoPostal);
+    console.log(`✅ Código postal completado: ${locationData.codigoPostal}`);
+
+    // 📸 Screenshot antes de los dropdowns
+    await page.screenshot({
+      path: "before-country-dropdown.png",
+      fullPage: true,
+    });
+
+    // CAMPO 4: Seleccionar País (Argentina) - VERSIÓN MEJORADA
+    console.log("🇦🇷 Seleccionando país...");
+    const paisDropdown = await page.waitForSelector(
+      `xpath=${locationXPaths.paisDropdown}`,
+      { timeout: 5000 }
+    );
+    await paisDropdown.click();
+    console.log("🔍 Dropdown de país abierto");
+
+    // Esperar más tiempo y tomar screenshot
+    await page.waitForTimeout(3000);
+    await page.screenshot({
+      path: "country-dropdown-opened.png",
+      fullPage: true,
+    });
+
+    // MÉTODO MEJORADO: Buscar Argentina con múltiples estrategias
+    console.log("🔍 Buscando Argentina en las opciones...");
+    const argentinaSelected = await selectCountryArgentina(page);
+    if (!argentinaSelected) {
+      throw new Error("No se pudo seleccionar Argentina");
+    }
+    console.log("✅ País seleccionado: Argentina");
+    await page.waitForTimeout(3000); // Esperar a que carguen las provincias
+
+    // CAMPO 5: Seleccionar Provincia
+    console.log(`🌎 Seleccionando provincia: ${locationData.provincia}...`);
+    const provinciaDropdown = await page.waitForSelector(
+      `xpath=${locationXPaths.provinciaDropdown}`,
+      { timeout: 10000 }
+    );
+    await provinciaDropdown.click();
+    await page.waitForTimeout(2000);
+
+    await page.screenshot({
+      path: "province-dropdown-opened.png",
+      fullPage: true,
+    });
+
+    const provinciaSelected = await selectDropdownOptionRobust(
+      page,
+      locationData.provincia,
+      "provincia"
+    );
+    if (!provinciaSelected) {
+      throw new Error(`No se encontró la provincia: ${locationData.provincia}`);
+    }
+    console.log(`✅ Provincia seleccionada: ${locationData.provincia}`);
+    await page.waitForTimeout(3000); // Esperar a que carguen los partidos
+
+    // CAMPO 6: Seleccionar Partido
+    console.log(`🏛️ Seleccionando partido: ${locationData.partido}...`);
+    const partidoDropdown = await page.waitForSelector(
+      `xpath=${locationXPaths.partidoDropdown}`,
+      { timeout: 10000 }
+    );
+    await partidoDropdown.click();
+    await page.waitForTimeout(2000);
+
+    await page.screenshot({
+      path: "partido-dropdown-opened.png",
+      fullPage: true,
+    });
+
+    const partidoSelected = await selectDropdownOptionRobust(
+      page,
+      locationData.partido,
+      "partido"
+    );
+    if (!partidoSelected) {
+      throw new Error(`No se encontró el partido: ${locationData.partido}`);
+    }
+    console.log(`✅ Partido seleccionado: ${locationData.partido}`);
+
+    // Tomar screenshot de ubicación completada
+    await page.screenshot({
+      path: "location-fields-completed.png",
+      fullPage: true,
+    });
+
+    console.log("🎉 Campos de ubicación completados exitosamente!");
+    return true;
+  } catch (error) {
+    console.error("💥 Error completando campos de ubicación:", error);
+    await page.screenshot({ path: "location-error.png", fullPage: true });
+    throw error;
+  }
+}
+
+// NUEVA FUNCIÓN ESPECÍFICA PARA SELECCIONAR ARGENTINA
+async function selectCountryArgentina(page: any) {
+  console.log("🇦🇷 Buscando Argentina con múltiples métodos...");
+
+  try {
+    // MÉTODO 1: XPath directo como intentamos antes
+    console.log("🔍 Método 1: XPath directo...");
+    try {
+      const argentinaOption = await page.waitForSelector(
+        "xpath=/html/body/div[4]/div[2]/div/div/div/mat-option[1]/span",
+        { timeout: 3000 }
+      );
+      await argentinaOption.click();
+      console.log("✅ Método 1 exitoso");
+      return true;
+    } catch (e) {
+      console.log("❌ Método 1 falló");
+    }
+
+    // MÉTODO 2: Buscar por texto "Argentina"
+    console.log("🔍 Método 2: Buscar por texto...");
+    try {
+      const allOptions = await page.$$("mat-option");
+      console.log(`📝 Encontradas ${allOptions.length} opciones`);
+
+      for (let i = 0; i < allOptions.length; i++) {
+        const option = allOptions[i];
+        const text = await option.textContent();
+        console.log(`   ${i + 1}. "${text?.trim()}"`);
+
+        if (text?.trim().toLowerCase() === "argentina") {
+          console.log("✅ ¡Argentina encontrada por texto!");
+          await option.click();
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log("❌ Método 2 falló");
+    }
+
+    // MÉTODO 3: Selector CSS más flexible
+    console.log("🔍 Método 3: CSS selector...");
+    try {
+      const options = await page.$$("mat-option span");
+      for (let i = 0; i < options.length; i++) {
+        const text = await options[i].textContent();
+        console.log(`   CSS ${i + 1}. "${text?.trim()}"`);
+
+        if (text?.trim().toLowerCase() === "argentina") {
+          console.log("✅ ¡Argentina encontrada por CSS!");
+          await options[i].click();
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log("❌ Método 3 falló");
+    }
+
+    // MÉTODO 4: Primera opción por defecto (como dice la imagen)
+    console.log("🔍 Método 4: Primera opción por defecto...");
+    try {
+      const firstOption = await page.$("mat-option:first-child");
+      if (firstOption) {
+        const text = await firstOption.textContent();
+        console.log(`Primera opción: "${text?.trim()}"`);
+        await firstOption.click();
+        console.log("✅ Primera opción seleccionada");
+        return true;
+      }
+    } catch (e) {
+      console.log("❌ Método 4 falló");
+    }
+
+    console.log("❌ Todos los métodos fallaron");
+    return false;
+  } catch (error) {
+    console.error("💥 Error en selectCountryArgentina:", error);
+    return false;
+  }
+}
+
+// FUNCIÓN MEJORADA PARA SELECCIONAR OPCIONES DE DROPDOWN
+async function selectDropdownOptionRobust(
+  page: any,
+  targetText: string,
+  dropdownType: string
+) {
+  console.log(`🔍 Buscando "${targetText}" en dropdown de ${dropdownType}...`);
+
+  try {
+    // Esperar a que aparezcan las opciones
+    await page.waitForTimeout(1000);
+
+    // MÉTODO 1: XPath específico
+    try {
+      const options = await page.$$(
+        "xpath=/html/body/div[4]/div[2]/div/div/div/mat-option"
+      );
+      console.log(`📝 Método XPath - Encontradas ${options.length} opciones`);
+
+      for (let i = 0; i < options.length; i++) {
+        try {
+          const spanElement = await options[i].$("span");
+          if (!spanElement) continue;
+
+          const optionText = await spanElement.textContent();
+          const cleanText = optionText?.trim() || "";
+
+          console.log(`   ${i + 1}. "${cleanText}"`);
+
+          if (cleanText.toLowerCase() === targetText.toLowerCase()) {
+            console.log(
+              `✅ ¡Encontrado por XPath! Seleccionando: "${cleanText}"`
+            );
+            await spanElement.click();
+            await page.waitForTimeout(500);
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    } catch (e) {
+      console.log("❌ Método XPath falló");
+    }
+
+    // MÉTODO 2: CSS selector más general
+    try {
+      const options = await page.$$("mat-option");
+      console.log(`📝 Método CSS - Encontradas ${options.length} opciones`);
+
+      for (let i = 0; i < options.length; i++) {
+        try {
+          const optionText = await options[i].textContent();
+          const cleanText = optionText?.trim() || "";
+
+          console.log(`   CSS ${i + 1}. "${cleanText}"`);
+
+          if (cleanText.toLowerCase() === targetText.toLowerCase()) {
+            console.log(
+              `✅ ¡Encontrado por CSS! Seleccionando: "${cleanText}"`
+            );
+            await options[i].click();
+            await page.waitForTimeout(500);
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    } catch (e) {
+      console.log("❌ Método CSS falló");
+    }
+
+    console.log(
+      `❌ No se encontró "${targetText}" en dropdown de ${dropdownType}`
+    );
+    return false;
+  } catch (error) {
+    console.error(
+      `💥 Error en selectDropdownOptionRobust para ${dropdownType}:`,
+      error
+    );
+    return false;
+  }
+}
+
+// 3. FUNCIÓN AUXILIAR PARA PARSEAR LA DIRECCIÓN
+function parseAddressData(fullAddress: string) {
+  console.log(`🧩 Parseando dirección: "${fullAddress}"`);
+
+  // Ejemplo: "Manuel Belgrano 2796, Olivos, Vicente López, Buenos Aires"
+  const parts = fullAddress.split(",").map((part) => part.trim());
+
+  let locationData = {
+    calle: "",
+    numero: "",
+    codigoPostal: "1636", // Valor por defecto según tu imagen
+    provincia: "Buenos Aires",
+    partido: "Vicente López",
+  };
+
+  if (parts.length >= 1) {
+    // Primera parte: calle y número
+    const calleNumero = parts[0];
+    const match = calleNumero.match(/^(.+?)\s+(\d+)$/);
+
+    if (match) {
+      locationData.calle = match[1].trim();
+      locationData.numero = match[2].trim();
+    } else {
+      locationData.calle = calleNumero;
+    }
+  }
+
+  // Detectar partido y provincia en las partes restantes
+  if (parts.length >= 2) {
+    for (let i = 1; i < parts.length; i++) {
+      const parte = parts[i].toLowerCase().trim();
+
+      // Si contiene "vicente lópez" o "olivos", es el partido
+      if (
+        parte.includes("vicente") ||
+        parte.includes("olivos") ||
+        parte.includes("san isidro")
+      ) {
+        locationData.partido = parts[i].trim();
+      }
+
+      // Si es "Buenos Aires" es la provincia
+      if (parte === "buenos aires") {
+        locationData.provincia = parts[i].trim();
+      }
+    }
+  }
+
+  console.log("📍 Datos parseados:", locationData);
+  return locationData;
+}
+
+
+
+
+async function getDetailedLocationFromAddress(fullAddress: string) {
+  console.log(`🌐 Geocodificando dirección: "${fullAddress}"`);
+
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    throw new Error("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY no está configurada");
+  }
+
+  try {
+    // Construir URL de la API de Google Maps Geocoding
+    const encodedAddress = encodeURIComponent(fullAddress);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}&language=es&region=ar`;
+
+    console.log("🔍 Consultando Google Maps API...");
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status !== "OK") {
+      throw new Error(
+        `Error de Google Maps API: ${data.status} - ${
+          data.error_message || "Error desconocido"
+        }`
+      );
+    }
+
+    if (!data.results || data.results.length === 0) {
+      throw new Error("No se encontraron resultados para la dirección");
+    }
+
+    // Obtener el primer resultado (más preciso)
+    const result = data.results[0];
+    console.log("📍 Resultado de geocodificación:", result);
+
+    // Extraer componentes de la dirección
+    const components = result.address_components;
+    const geometry = result.geometry;
+
+    // Inicializar datos de ubicación
+    const locationData = {
+      // Coordenadas
+      latitud: geometry.location.lat,
+      longitud: geometry.location.lng,
+
+      // Dirección formateada
+      direccionCompleta: result.formatted_address,
+
+      // Componentes específicos
+      calle: "",
+      numero: "",
+      codigoPostal: "",
+      barrio: "", // sublocality_level_1 (Olivos)
+      localidad: "", // locality o administrative_area_level_2 (Vicente López)
+      partido: "", // administrative_area_level_2
+      provincia: "", // administrative_area_level_1 (Buenos Aires)
+      pais: "", // country (Argentina)
+
+      // Datos adicionales
+      placeId: result.place_id,
+      tipoUbicacion: result.types,
+    };
+
+    // Procesar cada componente
+    components.forEach((component: any) => {
+      const types = component.types;
+      const longName = component.long_name;
+      const shortName = component.short_name;
+
+      console.log(
+        `🔍 Componente: ${longName} (${shortName}) - Tipos: [${types.join(
+          ", "
+        )}]`
+      );
+
+      // Número de calle
+      if (types.includes("street_number")) {
+        locationData.numero = longName;
+      }
+
+      // Nombre de la calle
+      if (types.includes("route")) {
+        locationData.calle = longName;
+      }
+
+      // Barrio/Sublocality (Olivos)
+      if (
+        types.includes("sublocality_level_1") ||
+        types.includes("sublocality")
+      ) {
+        locationData.barrio = longName;
+      }
+
+      // Localidad/Ciudad (Vicente López)
+      if (types.includes("locality")) {
+        locationData.localidad = longName;
+      }
+
+      // Partido (administrative_area_level_2 también puede ser Vicente López)
+      if (types.includes("administrative_area_level_2")) {
+        locationData.partido = longName;
+        // Si no tenemos localidad, usar este como localidad
+        if (!locationData.localidad) {
+          locationData.localidad = longName;
+        }
+      }
+
+      // Provincia
+      if (types.includes("administrative_area_level_1")) {
+        locationData.provincia = longName;
+      }
+
+      // País
+      if (types.includes("country")) {
+        locationData.pais = longName;
+      }
+
+      // Código postal
+      if (types.includes("postal_code")) {
+        locationData.codigoPostal = longName;
+      }
+    });
+
+    console.log("✅ Datos de ubicación extraídos:", locationData);
+    return locationData;
+  } catch (error) {
+    console.error("💥 Error en geocodificación:", error);
+    throw error;
+  }
+}
+
+
+// 3. FUNCIÓN MEJORADA PARA PARSEAR DIRECCIÓN (CON GOOGLE MAPS)
+async function parseAddressDataWithGoogleMaps(fullAddress: string) {
+    console.log(`🧩 Parseando dirección con Google Maps: "${fullAddress}"`);
+    
+    try {
+      // Intentar obtener datos de Google Maps primero
+      const googleData = await getDetailedLocationFromAddress(fullAddress);
+      
+      // Mapear a formato para RedRemax
+      const locationData = {
+        calle: googleData.calle || "",
+        numero: googleData.numero || "",
+        codigoPostal: googleData.codigoPostal || "1636",
+        provincia: googleData.provincia || "Buenos Aires",
+        partido: googleData.partido || googleData.localidad || "Vicente López",
+        
+        // Datos adicionales para debugging
+        barrio: googleData.barrio || "",
+        localidad: googleData.localidad || "",
+        coordenadas: {
+          lat: googleData.latitud,
+          lng: googleData.longitud
+        },
+        direccionFormateada: googleData.direccionCompleta
+      };
+  
+      console.log("📍 Datos parseados con Google Maps:", locationData);
+      return locationData;
+  
+    } catch (error) {
+      console.warn("⚠️ Fallback: Google Maps falló, usando parser manual");
+      
+      // Fallback al método manual si Google Maps falla
+      return parseAddressDataManual(fullAddress);
+    }
+  }
+  
+  // 4. FUNCIÓN MANUAL DE FALLBACK (TU FUNCIÓN ORIGINAL)
+  function parseAddressDataManual(fullAddress: string) {
+    console.log(`🧩 Parseando dirección manualmente: "${fullAddress}"`);
+    
+    const parts = fullAddress.split(',').map(part => part.trim());
+    
+    let locationData = {
+      calle: "",
+      numero: "",
+      codigoPostal: "1636",
+      provincia: "Buenos Aires",
+      partido: "Vicente López"
+    };
+  
+    if (parts.length >= 1) {
+      const calleNumero = parts[0];
+      const match = calleNumero.match(/^(.+?)\s+(\d+)$/);
+      
+      if (match) {
+        locationData.calle = match[1].trim();
+        locationData.numero = match[2].trim();
+      } else {
+        locationData.calle = calleNumero;
+      }
+    }
+  
+    if (parts.length >= 2) {
+      for (let i = 1; i < parts.length; i++) {
+        const parte = parts[i].toLowerCase().trim();
+        
+        if (parte.includes('vicente') || parte.includes('olivos') || parte.includes('san isidro')) {
+          locationData.partido = parts[i].trim();
+        }
+        
+        if (parte === 'buenos aires' || parte.includes('provincia de buenos aires')) {
+          locationData.provincia = parts[i].trim();
+        }
+      }
+    }
+  
+    console.log("📍 Datos parseados manualmente:", locationData);
+    return locationData;
+  }
