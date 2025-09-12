@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Bell, User, Heart, Settings, LogOut } from "lucide-react"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import PropertyCard from "@/components/property-card"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
+import PropertyCard from "@/components/properties/property-card"
 import { allProperties } from "@/lib/data"
 
 export default function ProfilePage() {

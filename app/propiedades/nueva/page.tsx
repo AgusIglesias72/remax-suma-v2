@@ -3,16 +3,17 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { SearchAutocomplete } from "@/components/google-autocomplete"
-import { ArrowLeft, Building, DollarSign, MapPin, Ruler, FileText, Save, Loader2, CheckCircle, Edit3 } from "lucide-react"
+import { SearchAutocomplete } from "@/components/search/google-autocomplete"
+import { ArrowLeft, Building, DollarSign, MapPin, Ruler, FileText, Save, Loader2, CheckCircle, Edit3, Sparkles } from "lucide-react"
 import Link from "next/link"
 
 // 🆕 INTERFAZ COMPLETA CON BARRIO
@@ -947,9 +948,28 @@ export default function NuevaPropiedadPageV2() {
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                Descripción *
-              </Label>
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-sm font-medium text-gray-700">
+                  Descripción *
+                </Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-300"
+                      disabled
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Crear con IA
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Próximamente</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Textarea
                 placeholder="Describe la propiedad, sus características principales, estado, comodidades..."
                 rows={8}
@@ -1050,10 +1070,10 @@ export default function NuevaPropiedadPageV2() {
             
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-white mb-3">
-                Cargar Nueva Propiedad V2
+                Cargar Nueva Propiedad
               </h1>
               <p className="text-white/80 text-lg">
-                🆕 Versión mejorada con campo Barrio incluido
+                
               </p>
             </div>
           </div>

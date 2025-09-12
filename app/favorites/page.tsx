@@ -8,9 +8,9 @@ import { ArrowLeft, Heart, Grid3X3, List, Filter, SortAsc, Trash2 } from "lucide
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import PropertyCard from "@/components/property-card"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import PropertyCard from "@/components/properties/property-card"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
 import { useFavorites } from "@/hooks/use-favorites"
 
 export default function FavoritesPage() {

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(npx @modelcontextprotocol/server-playwright:*)",
+      "Bash(npm search:*)",
+      "Bash(npx:*)",
+      "Bash(claude mcp:*)",
+      "Bash(claude:*)",
+      "Bash(mcp:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 5 npx @playwright/mcp --headless --port 3000)",
+      "Bash(findstr:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(next dev)",
+      "mcp__playwright__browser_console_messages",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(del:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)"
+    ],
+    "deny": []
+  }
+}

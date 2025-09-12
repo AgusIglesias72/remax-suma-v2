@@ -6,13 +6,12 @@ import { ArrowLeft, MapPin, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
 import Link from "next/link"
-import PropertyMapWrapper from "@/components/property-map-wrapper"
-import { SearchAutocomplete } from "@/components/google-autocomplete"
+import PropertyMapWrapper from "@/components/properties/property-map-wrapper"
+import { SearchAutocomplete } from "@/components/search/google-autocomplete"
 import { allProperties } from "@/lib/data"
-import { EmptyState, SearchLoading } from "@/components/loading-states"
 import { MapErrorBoundary } from "@/components/error-boundary"
 
 // Constantes para evitar recreaciones
@@ -218,7 +217,10 @@ export default function SearchLocationPage() {
                   </CardHeader>
                   <CardContent>
                     {isSearching ? (
-                      <SearchLoading message="Buscando propiedades cercanas..." />
+                      <div className="flex items-center justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mr-2"></div>
+                        <span className="text-sm text-gray-600">Buscando propiedades cercanas...</span>
+                      </div>
                     ) : (
                       <div className="space-y-4">
                         <div>
@@ -270,7 +272,10 @@ export default function SearchLocationPage() {
                   <MapErrorBoundary>
                     {isSearching ? (
                       <div className="h-[500px] w-full bg-gray-100 rounded-lg flex items-center justify-center">
-                        <SearchLoading message="Cargando mapa..." />
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+                          <span className="text-sm text-gray-600">Cargando mapa...</span>
+                        </div>
                       </div>
                     ) : (
                       <PropertyMapWrapper
@@ -286,25 +291,31 @@ export default function SearchLocationPage() {
               
               {!location && !isSearching && (
                 <div className="mt-6">
-                  <EmptyState
-                    icon={MapPin}
-                    title="Busca una ubicación"
-                    description="Usa el buscador arriba para encontrar propiedades cerca de cualquier ubicación en Buenos Aires"
-                    actionLabel="Buscar en Palermo"
-                    onAction={() => handleQuickAreaSearch("Palermo")}
-                  />
+                  <div className="text-center py-8 px-4 bg-gray-50 rounded-lg">
+                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Busca una ubicación</h3>
+                    <p className="text-gray-600 mb-4">
+                      Usa el buscador arriba para encontrar propiedades cerca de cualquier ubicación en Buenos Aires
+                    </p>
+                    <Button onClick={() => handleQuickAreaSearch("Palermo")} className="bg-red-600 hover:bg-red-700">
+                      Buscar en Palermo
+                    </Button>
+                  </div>
                 </div>
               )}
 
               {location && foundProperties === 0 && !isSearching && (
                 <div className="mt-6">
-                  <EmptyState
-                    icon={Search}
-                    title="No hay propiedades en esta área"
-                    description={`No encontramos propiedades en un radio de ${radius} km de ${location.address}. Intenta ampliar el radio de búsqueda.`}
-                    actionLabel="Ampliar búsqueda"
-                    onAction={() => handleRadiusChange("25")}
-                  />
+                  <div className="text-center py-8 px-4 bg-gray-50 rounded-lg">
+                    <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No hay propiedades en esta área</h3>
+                    <p className="text-gray-600 mb-4">
+                      {`No encontramos propiedades en un radio de ${radius} km de ${location.address}. Intenta ampliar el radio de búsqueda.`}
+                    </p>
+                    <Button onClick={() => handleRadiusChange("25")} className="bg-red-600 hover:bg-red-700">
+                      Ampliar búsqueda
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

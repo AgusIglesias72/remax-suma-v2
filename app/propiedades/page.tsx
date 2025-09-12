@@ -9,15 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import PropertyCard from "@/components/property-card"
-import PropertyMapWrapper from "@/components/property-map-wrapper"
+import PropertyCard from "@/components/properties/property-card"
+import PropertyMapWrapper from "@/components/properties/property-map-wrapper"
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider" 
-import { SearchAutocomplete } from "@/components/google-autocomplete"
+import { SearchAutocomplete } from "@/components/search/google-autocomplete"
 import { allProperties } from "@/lib/data"
 import { usePropertyFilters } from "@/hooks/use-property-filters"
 import { useUrlFilters } from "@/hooks/use-url-filters"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
 
 export default function PropertiesPage() {
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")

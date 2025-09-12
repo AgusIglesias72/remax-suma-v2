@@ -6,8 +6,8 @@ import Image from "next/image"
 import { Home, Search, MapPin, ArrowLeft, Phone, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
 
 export default function NotFound() {
   return (

@@ -1,4 +1,5 @@
 // app/api/propiedades/nueva/route.ts
+import { normalizeText } from "@/lib/text-utils";
 import { NextRequest, NextResponse } from "next/server";
 import { chromium } from "playwright";
 
@@ -377,7 +378,7 @@ async function fillLocationFields(page: any, formattedData: any) {
     await page.waitForTimeout(2000);
     await page.screenshot({ path: "province-dropdown-opened.png", fullPage: true });
 
-    const provinciaSelected = await selectDropdownOptionRobust(page, formattedData.provincia, "provincia");
+    const provinciaSelected = await selectDropdownOptionRobustWithNormalization(page, formattedData.provincia, "provincia");
     if (!provinciaSelected) {
       throw new Error(`No se encontró la provincia: ${formattedData.provincia}`);
     }
@@ -391,7 +392,7 @@ async function fillLocationFields(page: any, formattedData: any) {
     await page.waitForTimeout(2000);
     await page.screenshot({ path: "partido-dropdown-opened.png", fullPage: true });
 
-    const partidoSelected = await selectDropdownOptionRobust(page, formattedData.localidad, "localidad");
+    const partidoSelected = await selectDropdownOptionRobustWithNormalization(page, formattedData.localidad, "localidad");
     if (!partidoSelected) {
       throw new Error(`No se encontró la localidad: ${formattedData.localidad}`);
     }
@@ -448,13 +449,22 @@ async function selectCountryArgentina(page: any) {
   }
 }
 
-async function selectDropdownOptionRobust(page: any, targetText: string, dropdownType: string) {
+// 🆕 FUNCIÓN ACTUALIZADA - Reemplaza la función selectDropdownOptionRobust existente
+async function selectDropdownOptionRobustWithNormalization(
+  page: any, 
+  targetText: string, 
+  dropdownType: string
+): Promise<boolean> {
   console.log(`🔍 Buscando "${targetText}" en dropdown de ${dropdownType}...`);
 
   try {
     await page.waitForTimeout(1000);
 
-    // Método 1: CSS selector
+    // Normalizar el texto objetivo
+    const normalizedTarget = normalizeText(targetText);
+    console.log(`🎯 Texto normalizado objetivo: "${normalizedTarget}"`);
+
+    // Método 1: CSS selector con normalización
     try {
       const options = await page.$$("mat-option");
       console.log(`📝 Encontradas ${options.length} opciones`);
@@ -463,9 +473,12 @@ async function selectDropdownOptionRobust(page: any, targetText: string, dropdow
         try {
           const optionText = await options[i].textContent();
           const cleanText = optionText?.trim() || "";
-          console.log(`   ${i + 1}. "${cleanText}"`);
+          const normalizedOption = normalizeText(cleanText);
+          
+          console.log(`   ${i + 1}. "${cleanText}" → normalizado: "${normalizedOption}"`);
 
-          if (cleanText.toLowerCase() === targetText.toLowerCase()) {
+          // 🎯 COMPARACIÓN NORMALIZADA (sin acentos ni mayúsculas)
+          if (normalizedOption === normalizedTarget) {
             console.log(`✅ ¡Encontrado! Seleccionando: "${cleanText}"`);
             await options[i].click();
             await page.waitForTimeout(500);
@@ -479,7 +492,32 @@ async function selectDropdownOptionRobust(page: any, targetText: string, dropdow
       console.log("❌ Método CSS falló");
     }
 
-    console.log(`❌ No se encontró "${targetText}" en dropdown de ${dropdownType}`);
+    // Método 2: Búsqueda por coincidencia parcial (fallback)
+    try {
+      const options = await page.$$("mat-option");
+      
+      for (let i = 0; i < options.length; i++) {
+        try {
+          const optionText = await options[i].textContent();
+          const cleanText = optionText?.trim() || "";
+          const normalizedOption = normalizeText(cleanText);
+          
+          // Verificar si el texto objetivo está contenido en la opción o viceversa
+          if (normalizedOption.includes(normalizedTarget) || normalizedTarget.includes(normalizedOption)) {
+            console.log(`✅ ¡Coincidencia parcial! Seleccionando: "${cleanText}"`);
+            await options[i].click();
+            await page.waitForTimeout(500);
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    } catch (e) {
+      console.log("❌ Método de coincidencia parcial falló");
+    }
+
+    console.log(`❌ No se encontró "${targetText}" (normalizado: "${normalizedTarget}") en dropdown de ${dropdownType}`);
     return false;
   } catch (error) {
     console.error(`💥 Error en selectDropdownOptionRobust:`, error);

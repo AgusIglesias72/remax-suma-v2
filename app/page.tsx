@@ -5,18 +5,22 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ArrowRight, TrendingUp, Users, MapIcon, Home, Search, Store, Car, Building, Warehouse } from "lucide-react"
+import { ArrowRight, TrendingUp, Users, MapIcon, Home, Search, Store, Car, Building, Warehouse, User, Heart, Bell, Plus, MessageCircle, Calculator, FileText, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import PropertyCard from "@/components/property-card"
-import { SearchAutocomplete } from "@/components/google-autocomplete"
+import PropertyCard from "@/components/properties/property-card"
+import { SearchAutocomplete } from "@/components/search/google-autocomplete"
 import { type LocationData } from "@/lib/location-utils"
 import { featuredProperties, stats } from "@/lib/data"
 import { formatPrice } from "@/lib/data"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import EnhancedSearchBar from '@/components/enhanced-search-bar'
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
+import EnhancedSearchBar from '@/components/search/enhanced-search-bar'
+import PopularSearches from '@/components/search/popular-searches'
+import HeroSection from '@/components/layout/hero-section'
+import { useUser } from "@clerk/nextjs"
+import MobileBottomNav from "@/components/layout/mobile-bottom-nav"
 
 const operationImages = {
   comprar: 'https://www.obtengavisa.com.ar/img/compra_propiedad2.jpg', // Casa moderna para comprar
@@ -123,6 +127,7 @@ function SafeSelect({
 
 export default function HomePage() {
   const router = useRouter()
+  const { user, isLoaded } = useUser()
 
   // Inicializar estados con valores por defecto idénticos en server y client
   const [operationType, setOperationType] = useState("venta")
@@ -193,12 +198,23 @@ export default function HomePage() {
     router.push('/propiedades')
   }
 
+  const handlePopularSearch = (searchParams: Record<string, string>) => {
+    if (!mounted) return
+    const params = new URLSearchParams(searchParams)
+    router.push(`/propiedades?${params.toString()}`)
+  }
+
   const handleEnhancedSearch = (data: {
     operation: string;
-    propertyType: string;
-    rooms: string;
-    selectedLocation: { address: string; lat: number; lng: number } | null;
-    priceRange: string;
+    propertyType: string[];  // Cambiado a array
+    rooms: string[];         // Cambiado a array
+    selectedLocations: { address: string; lat: number; lng: number }[]; // Cambiado a array
+    priceFrom: string;
+    priceTo: string;
+    surfaceFrom: string;
+    surfaceTo: string;
+    bathrooms: string;
+    garages: string;
   }) => {
     if (!mounted) return;
   
@@ -211,26 +227,49 @@ export default function HomePage() {
       params.set("operacion", data.operation);
     }
   
-    // Mapear tipo de propiedad (mantener tu lógica existente)
-    if (data.propertyType) {
-      params.set("tipo", data.propertyType);
+    // Mapear tipos de propiedad (múltiples valores)
+    if (data.propertyType && data.propertyType.length > 0) {
+      params.set("tipos", data.propertyType.join(','));
     }
   
-    // Mapear ambientes
-    if (data.rooms) {
-      params.set("ambientes", data.rooms);
+    // Mapear ambientes (múltiples valores)
+    if (data.rooms && data.rooms.length > 0) {
+      params.set("ambientes", data.rooms.join(','));
     }
   
-    // Mapear ubicación (usar tu lógica existente de selectedLocation)
-    if (data.selectedLocation) {
-      params.set("ubicacion", data.selectedLocation.address.toLowerCase().replace(" ", "-"));
-      params.set("lat", data.selectedLocation.lat.toString());
-      params.set("lng", data.selectedLocation.lng.toString());
+    // Mapear múltiples ubicaciones
+    if (data.selectedLocations && data.selectedLocations.length > 0) {
+      const addresses = data.selectedLocations.map(loc => loc.address).join('|');
+      const latitudes = data.selectedLocations.map(loc => loc.lat.toString()).join(',');
+      const longitudes = data.selectedLocations.map(loc => loc.lng.toString()).join(',');
+      
+      params.set("ubicaciones", addresses);
+      params.set("latitudes", latitudes);
+      params.set("longitudes", longitudes);
     }
   
-    // Mapear rango de precio
-    if (data.priceRange) {
-      params.set("precio", data.priceRange);
+    // Mapear precios
+    if (data.priceFrom) {
+      params.set("precio-desde", data.priceFrom);
+    }
+    if (data.priceTo) {
+      params.set("precio-hasta", data.priceTo);
+    }
+  
+    // Mapear superficie
+    if (data.surfaceFrom) {
+      params.set("superficie-desde", data.surfaceFrom);
+    }
+    if (data.surfaceTo) {
+      params.set("superficie-hasta", data.surfaceTo);
+    }
+  
+    // Mapear baños y cocheras
+    if (data.bathrooms) {
+      params.set("banos", data.bathrooms);
+    }
+    if (data.garages) {
+      params.set("cocheras", data.garages);
     }
   
     // Navegar a propiedades con los filtros
@@ -240,39 +279,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         {/* Hero Section */}
-        {/* Hero Section Mejorado */}
-        <section 
-          className="relative min-h-[70vh] flex items-center justify-center bg-cover bg-center"
-          style={{
-            backgroundImage: 'url("https://d1acdg20u0pmxj.cloudfront.net/ar/assets/media/webp/home/bg-herobanner.webp")'
-          }}
-        >
-          {/* Overlay mejorado */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
-          
-          {/* Contenido */}
-          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-12">
-            {/* Título y subtítulo */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
-                Encuentra tu lugar ideal en Buenos Aires
-              </h1>
-              <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg">
-                Las mejores propiedades en venta y alquiler con los agentes más calificados
-              </p>
-            </div>
-
-            {/* Buscador mejorado */}
-            <EnhancedSearchBar 
-              onSearch={handleEnhancedSearch}
-              onLocationSelect={handleLocationSelect}
-              selectedLocation={selectedLocation}
-              mounted={mounted}
-            />
-          </div>
-        </section>
+        <HeroSection 
+          onLocationSelect={handleLocationSelect}
+          selectedLocation={selectedLocation}
+          mounted={mounted}
+        />
 
 
 {/* Stats Section */}
@@ -634,6 +647,7 @@ export default function HomePage() {
       </main>
 
       <Footer />
+      <MobileBottomNav />
     </div>
   )
 }
