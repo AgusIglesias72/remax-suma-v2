@@ -35,9 +35,12 @@ import {
   AlertCircle
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useUser, useClerk } from "@clerk/nextjs"
+import Image from "next/image"
+// ... resto de imports de UI components ...
 import {
   Sidebar,
   SidebarContent,
@@ -65,7 +68,6 @@ import {
 } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import Image from "next/image"
 import {
   Tooltip,
   TooltipContent,
@@ -158,6 +160,12 @@ const mainNavItems = [
     title: "Herramientas",
     icon: Wrench,
     items: [
+      {
+        title: "ACM - Cotizador",
+        href: "/admin/acm",
+        icon: TrendingUp,
+        label: "Nuevo",
+      },
       {
         title: "Referidos",
         href: "/admin/herramientas/referidos",
@@ -259,7 +267,32 @@ function SidebarHeaderContent() {
 // Componente para el Footer del Sidebar que responde al estado colapsado
 function SidebarFooterContent() {
   const { state } = useSidebar()
+  const { user } = useUser()
+  const { signOut } = useClerk()
+  const router = useRouter()
   const isCollapsed = state === "collapsed"
+
+  // Obtener iniciales del usuario
+  const initials = user ? 
+    `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || 
+    user.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() || 
+    'U' 
+    : 'U'
+
+  // Obtener rol desde metadata
+  const userRole = user?.publicMetadata?.role as string || 'CLIENT'
+  const roleDisplay = {
+    'CLIENT': 'Cliente',
+    'AGENT': 'Agente',
+    'TEAM_LEADER': 'Líder de Equipo',
+    'OFFICE_MANAGER': 'Gerente',
+    'ADMIN': 'Administrador'
+  }[userRole] || 'Cliente'
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+  }
 
   return (
     <DropdownMenu>
@@ -275,14 +308,26 @@ function SidebarFooterContent() {
             "flex items-center gap-3",
             isCollapsed ? "justify-center" : "justify-between w-full"
           )}>
-            <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-              JD
-            </div>
+            {user?.imageUrl ? (
+              <Image
+                src={user.imageUrl}
+                alt={user.firstName || 'Usuario'}
+                width={32}
+                height={32}
+                className="rounded-full flex-shrink-0"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                {initials}
+              </div>
+            )}
             {!isCollapsed && (
               <>
                 <div className="flex flex-col flex-1 text-left">
-                  <span className="text-sm font-medium">Juan Díaz</span>
-                  <span className="text-xs text-muted-foreground">Agente</span>
+                  <span className="text-sm font-medium">
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{roleDisplay}</span>
                 </div>
                 <MoreVertical className="h-4 w-4 text-muted-foreground" />
               </>
@@ -298,12 +343,26 @@ function SidebarFooterContent() {
         sideOffset={8}
       >
         <DropdownMenuLabel className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-medium">
-            JD
-          </div>
+          {user?.imageUrl ? (
+            <Image
+              src={user.imageUrl}
+              alt={user.firstName || 'Usuario'}
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-medium">
+              {initials}
+            </div>
+          )}
           <div className="flex flex-col">
-            <span className="text-sm font-medium">Juan Díaz</span>
-            <span className="text-xs text-muted-foreground">juan@remax.com</span>
+            <span className="text-sm font-medium">
+              {user?.firstName} {user?.lastName}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {user?.emailAddresses?.[0]?.emailAddress}
+            </span>
           </div>
         </DropdownMenuLabel>
         
@@ -348,7 +407,10 @@ function SidebarFooterContent() {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600">
+        <DropdownMenuItem 
+          onClick={handleSignOut}
+          className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+        >
           <LogOut className="h-4 w-4" />
           <span>Cerrar Sesión</span>
         </DropdownMenuItem>
@@ -391,6 +453,32 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = React.useState<string[]>([])
+  const { user, isLoaded } = useUser()
+  const router = useRouter()
+
+  // Verificar autenticación y rol
+  React.useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in')
+    }
+    
+    // Verificar si tiene permisos de admin/agente
+    const userRole = user?.publicMetadata?.role as string
+    const allowedRoles = ['AGENT', 'TEAM_LEADER', 'OFFICE_MANAGER', 'ADMIN', 'SUPER_ADMIN']
+    
+    if (isLoaded && user && !allowedRoles.includes(userRole)) {
+      router.push('/admin') // Redirigir a dashboard de cliente
+    }
+  }, [isLoaded, user, router])
+
+  // Mostrar loading mientras verifica autenticación
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    )
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -410,7 +498,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {mainNavItems.map((item) => (
-
                       <SidebarMenuItem key={item.title}>
                         {item.items ? (
                           <Collapsible
@@ -561,7 +648,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <SidebarTrigger className="-ml-2" />
             <Separator orientation="vertical" className="h-6" />
             <div className="flex-1">
-              <h1 className="text-sm font-medium">Panel de Administración</h1>
+              <h1 className="text-sm font-medium">
+                Bienvenido, {user?.firstName || 'Usuario'}
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               {/* Notificaciones en el header */}
@@ -589,67 +678,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   
                   <DropdownMenuSeparator />
                   
-                  <div className="max-h-96 overflow-y-auto">
-                    <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                      <div className="h-2 w-2 rounded-full bg-red-600 mt-2 flex-shrink-0" />
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium">Nueva consulta de propiedad</p>
-                        <p className="text-xs text-muted-foreground">
-                          Roberto Martínez está interesado en Casa en Palermo - $450,000
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>Hace 5 minutos</span>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                      <div className="h-2 w-2 rounded-full bg-red-600 mt-2 flex-shrink-0" />
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium">Visita programada confirmada</p>
-                        <p className="text-xs text-muted-foreground">
-                          Ana Rodríguez confirmó la visita para mañana a las 10:00 AM
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>Hace 1 hora</span>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer">
-                      <div className="h-2 w-2 rounded-full bg-red-600 mt-2 flex-shrink-0" />
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium">Oferta recibida</p>
-                        <p className="text-xs text-muted-foreground">
-                          Nueva oferta de $275,000 por PH en San Telmo
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>Hace 2 horas</span>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuSeparator />
-                    
-                    <DropdownMenuItem className="flex items-start gap-3 p-3 cursor-pointer opacity-60">
-                      <div className="h-2 w-2 rounded-full border border-muted-foreground mt-2 flex-shrink-0" />
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm">Propiedad actualizada</p>
-                        <p className="text-xs text-muted-foreground">
-                          Se actualizó el precio de Departamento en Belgrano
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>Ayer</span>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                  </div>
-                  
-                  <DropdownMenuSeparator />
+                  {/* Contenido de notificaciones... */}
                   
                   <div className="p-2">
                     <Button variant="ghost" size="sm" className="w-full justify-center">
@@ -658,7 +687,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
               <Separator orientation="vertical" className="h-6" />
+              
               <Button variant="outline" size="sm" asChild>
                 <Link href="/admin/propiedades/nueva">
                   <PlusCircle className="h-4 w-4 mr-2" />
@@ -678,4 +709,5 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
     </SidebarProvider>
   </TooltipProvider>
-  )}
+  )
+}

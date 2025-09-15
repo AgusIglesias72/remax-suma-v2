@@ -12,21 +12,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs"
-import { useRole } from "@/hooks/use-role"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { Badge } from "@/components/ui/badge"
+import { AuthModal } from "@/components/auth/auth-modal"
 
 export default function Navbar() {
   const [mounted, setMounted] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalView, setAuthModalView] = useState<'sign-in' | 'sign-up'>('sign-in')
   const { user, isLoaded } = useUser()
-  const { role, isAgent } = useRole()
+  const { signOut } = useClerk()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Obtener rol desde metadata de Clerk
+  const userRole = user?.publicMetadata?.role as string || 'CLIENT'
+  const isAgent = ['AGENT', 'TEAM_LEADER', 'OFFICE_MANAGER', 'ADMIN'].includes(userRole)
+
   // Formatear el rol para mostrar
-  const formatRole = (userRole: string) => {
+  const formatRole = (role: string) => {
     const roles: Record<string, string> = {
       'CLIENT': 'Cliente',
       'AGENT': 'Agente Inmobiliario',
@@ -34,7 +40,7 @@ export default function Navbar() {
       'OFFICE_MANAGER': 'Gerente de Oficina',
       'ADMIN': 'Administrador'
     }
-    return roles[userRole] || 'Cliente'
+    return roles[role] || 'Cliente'
   }
 
   return (
@@ -42,7 +48,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link href="/" className="flex  items-center">
+          <Link href="/" className="flex items-center">
             <Image
               src="/remax.svg"
               alt="REMAX SUMA Logo"
@@ -138,7 +144,7 @@ export default function Navbar() {
                           <p className="font-semibold text-gray-900">
                             {user.firstName} {user.lastName}
                           </p>
-                          <p className="text-sm text-gray-500">{formatRole(role)}</p>
+                          <p className="text-sm text-gray-500">{formatRole(userRole)}</p>
                           <p className="text-xs text-green-600 flex items-center gap-1 mt-0.5">
                             <span className="w-2 h-2 bg-green-600 rounded-full"></span>
                             Online
@@ -171,7 +177,7 @@ export default function Navbar() {
                         <DropdownMenuSeparator />
 
                         <DropdownMenuItem asChild>
-                          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm cursor-pointer">
+                          <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 text-sm cursor-pointer">
                             <LayoutDashboard className="h-4 w-4 text-gray-400" />
                             <div>
                               <p className="font-medium">Dashboard</p>
@@ -240,10 +246,7 @@ export default function Navbar() {
 
                         <DropdownMenuItem 
                           className="flex items-center gap-3 px-4 py-2.5 text-sm cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            // Clerk maneja el logout automáticamente
-                            window.location.href = '/';
-                          }}
+                          onClick={() => signOut({ redirectUrl: '/' })}
                         >
                           <LogOut className="h-4 w-4" />
                           <div>
@@ -272,21 +275,25 @@ export default function Navbar() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem asChild>
-                        <SignInButton mode="modal">
-                          <div className="flex items-center gap-3 px-2 py-2 cursor-pointer w-full">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="font-medium">Iniciar Sesión</span>
-                          </div>
-                        </SignInButton>
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setAuthModalView('sign-in');
+                          setAuthModalOpen(true);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <User className="h-4 w-4 text-gray-400 mr-3" />
+                        <span className="font-medium">Iniciar Sesión</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <SignUpButton mode="modal">
-                          <div className="flex items-center gap-3 px-2 py-2 cursor-pointer w-full">
-                            <Plus className="h-4 w-4 text-gray-400" />
-                            <span className="font-medium">Registrarse</span>
-                          </div>
-                        </SignUpButton>
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setAuthModalView('sign-up');
+                          setAuthModalOpen(true);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Plus className="h-4 w-4 text-gray-400 mr-3" />
+                        <span className="font-medium">Registrarse</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -320,16 +327,28 @@ export default function Navbar() {
                 </Button>
               </>
             ) : (
-              <Link href="/sign-in" className="cursor-pointer">
-                <Button variant="ghost" size="sm" className="h-8 px-3 text-xs">
-                  Iniciar Sesión
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 px-3 text-xs"
+                onClick={() => {
+                  setAuthModalView('sign-in');
+                  setAuthModalOpen(true);
+                }}
+              >
+                Iniciar Sesión
+              </Button>
             )}
           </div>
         </div>
-
       </div>
+
+      {/* Modal de Autenticación */}
+      <AuthModal 
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        defaultView={authModalView}
+      />
     </header>
   )
 }

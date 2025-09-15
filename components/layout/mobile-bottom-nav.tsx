@@ -45,10 +45,10 @@ export default function MobileBottomNav() {
     },
     {
       id: "profile",
-      href: user ? "/dashboard" : "/sign-in",
+      href: user ? "/admin" : "/sign-in",
       icon: User,
       label: "Mi Perfil",
-      active: pathname === "/dashboard" || pathname.startsWith("/perfil")
+      active: pathname === "/admin" || pathname.startsWith("/perfil")
     }
   ]
 

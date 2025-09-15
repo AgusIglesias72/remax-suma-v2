@@ -30,7 +30,7 @@ export default function OnboardingPage() {
       if (role === 'AGENT') {
         router.push('/agent/setup');
       } else {
-        router.push('/dashboard');
+        router.push('/admin');
       }
     } catch (error) {
       console.error('Error updating user role:', error);

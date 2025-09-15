@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppWrapper from "@/components/app-wrapper";
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
-import { ClerkProviderWrapper } from "@/components/providers/clerk-provider";
+import { ClerkProvider } from '@clerk/nextjs';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,20 +42,22 @@ export default function RootLayout({
 }>) {
 
 
-  
+
   return (
-    <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ClerkProviderWrapper>
+    <ClerkProvider>
+
+      <html lang="es">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
           <GoogleMapsProvider>
             <AppWrapper>
               {children}
             </AppWrapper>
           </GoogleMapsProvider>
-        </ClerkProviderWrapper>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
+
   );
 }
