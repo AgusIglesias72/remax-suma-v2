@@ -5,6 +5,7 @@ import "./globals.css";
 import AppWrapper from "@/components/app-wrapper";
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
 import { ClerkProvider } from '@clerk/nextjs';
+import { Toaster } from 'sonner'; // ← AGREGAR ESTO
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,12 +41,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-
-
   return (
     <ClerkProvider>
-
       <html lang="es">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -54,10 +51,24 @@ export default function RootLayout({
             <AppWrapper>
               {children}
             </AppWrapper>
+            {/* AGREGAR EL TOASTER AQUÍ */}
+            <Toaster 
+              position="top-right"
+              expand={false}
+              richColors
+              closeButton
+              duration={4000}
+              toastOptions={{
+                style: {
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                },
+                className: 'toast-notification',
+              }}
+            />
           </GoogleMapsProvider>
         </body>
       </html>
     </ClerkProvider>
-
   );
 }
